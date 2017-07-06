@@ -1,10 +1,7 @@
 http://:{$OS_PORT} {
 
-    #~ root {$PWD}/src/
     root {$HTTP_STATIC_ROOT}
 
-    #~ proxy / localhost:5000 {
-    #~ proxy / unix:{$PWD}/gunicorn.sock {
     proxy / {$WSGI_BIND} {
         transparent
         except /static

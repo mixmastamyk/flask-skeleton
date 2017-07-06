@@ -7,6 +7,7 @@ HTTP_STATIC_ROOT="/usr/local/lib/python3.5/dist-packages/app"
 OS_NUM_FILES=8192
 OS_PORT=80
 PKG_NAME=app.tgz
+# toggle the next three lines to switch to net sockets:
 WSGI_BIND="unix:/run/gunicorn.sock"
 #~ WSGI_PORT=5150
 #~ WSGI_BIND="localhost:$WSGI_PORT"
@@ -21,7 +22,6 @@ function load_meta {
 
 if [ "$1" == "clean" ]; then
     # clean up
-    #~ sudo acbuild end
     sudo rm -rf .acbuild/ dist/ rootfs/ MANIFEST manifest *.aci  __pycache__
 
 elif [ "$1" == "prep" ]; then
@@ -35,6 +35,7 @@ elif [ "$1" == "prep" ]; then
     sudo chown -R $USER .acbuild
     sudo chgrp -R $USER .acbuild
 
+    # alpine doesn't work, can't build bcrypt and cffi
     # ubuntu
     toilet -f smblock --filter border:metal ' Ubuntu Stuff! '
     acbuild environment add DEBIAN_FRONTEND noninteractive
@@ -115,13 +116,3 @@ else  # final write
     acbuild write --overwrite $APP_NAME_LOW-$APP_VERSION.aci
     toilet -f smblock --filter border:metal '  Done.  '
 fi
-
-
-# alpine attempt, doesn't work, can't build bcrypt and cffi
-#~ acbuild begin docker://alpine:3.5
-# bug: https://github.com/containers/build/issues/277
-#~ # https://github.com/containers/build/blob/master/Documentation/getting-started.md
-#~ sudo acbuild run -- apk update
-#~ # sudo acbuild run -- apk add 'python3=3.5.2-r9' py-cffi
-#~ sudo acbuild run -- apk add python3 py3-cffi
-
