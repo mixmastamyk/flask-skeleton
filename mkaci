@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+
+# move these to config or somewhere:
+CONTAINER_BASE="docker://ubuntu:17.04"
+DEBIAN_PKGS="python3 python3-setuptools python3-pip gunicorn3 dumb-init"
+HTTP_STATIC_ROOT="/usr/local/lib/python3.5/dist-packages/app"
+OS_NUM_FILES=8192
+OS_PORT=80
+PKG_NAME=app.tgz
+WSGI_BIND="unix:/run/gunicorn.sock"
+#~ WSGI_PORT=5150
+#~ WSGI_BIND="localhost:$WSGI_PORT"
+WSGI_NUM_WORKERS=4
+
+function load_meta {
+    # load metadata from python app, one stop shop
+    #~ sets APP_NAME APP_NAME_LOW APP_VERSION APP_AUTHORS APP_LICENSE
+    source <(python3 -S -c 'import src.meta as m; m.print_env("APP")')
+}
+
+
+if [ "$1" == "clean" ]; then
+    # clean up
+    #~ sudo acbuild end
+    sudo rm -rf .acbuild/ dist/ rootfs/ MANIFEST manifest *.aci  __pycache__
+
+elif [ "$1" == "prep" ]; then
+
+    load_meta
+    toilet -f smblock --filter border:metal '  Download  Image...  '
+    sudo acbuild begin "$CONTAINER_BASE"
+
+    # fix sudo perms - ssl certs broken due to perms in /etc/...
+    # how to fix correctly?
+    sudo chown -R $USER .acbuild
+    sudo chgrp -R $USER .acbuild
+
+    # ubuntu
+    toilet -f smblock --filter border:metal ' Ubuntu Stuff! '
+    acbuild environment add DEBIAN_FRONTEND noninteractive
+    sudo acbuild run -- apt update
+    toilet -f smblock --filter border:metal ' Install, Cleanup... '
+    sudo acbuild run -- apt install --no-install-recommends --yes $DEBIAN_PKGS
+
+    # clean up
+    sudo acbuild run -- apt clean
+    sudo acbuild run -- rm -rf /var/lib/apt/lists  # from apt update
+    # shave a few more mb of detritus:
+    sudo acbuild run -- rm -rf                                          \
+                                /usr/share/man                          \
+                                /usr/share/doc                          \
+                                /usr/share/locale                       \
+                                /usr/lib/x86_64-linux-gnu/perl-base     \
+                                /sbin                                   \
+                                /var/lib/dpkg                           \
+
+    # install from PyPi
+    toilet -f smblock --filter border:metal '  pip install <  PyPI...  '
+    acbuild environment add PYTHONIOENCODING "utf8:backslashreplace" # console
+    sudo acbuild run -- pip3 install --no-cache-dir --upgrade pip
+    sudo acbuild run -- pip3 install --no-cache-dir --pre flask_restless  # β
+    eval sudo acbuild run -- pip3 install --no-cache-dir \
+      $(python3 -S -c 'import src.meta as m; print(*(repr(r) for r in m.pkg_reqs))')
+
+    # set metadata
+    echo -n "Setting metadata... "
+    #~ acbuild annotation add appc.io/executor/supports-systemd-notify true
+    acbuild annotation add authors "$APP_AUTHORS"
+    acbuild annotation add license "$APP_LICENSE"
+    acbuild environment add APP_NAME_LOW "$APP_NAME_LOW"
+    acbuild environment add HTTP_STATIC_ROOT "$HTTP_STATIC_ROOT"
+    acbuild environment add OS_NUM_FILES "$OS_NUM_FILES"
+    acbuild environment add OS_PORT "$OS_PORT"
+    acbuild environment add WSGI_BIND "$WSGI_BIND"
+    acbuild environment add WSGI_NUM_WORKERS "$WSGI_NUM_WORKERS"
+    acbuild label add arch amd64
+    acbuild label add os linux
+    acbuild label add version "$APP_VERSION"
+    acbuild port add www tcp $OS_PORT
+    acbuild set-exec /usr/bin/dumb-init /start.sh
+    acbuild set-name mydomain.com/$APP_NAME_LOW
+    echo "Done."
+
+else  # final write
+
+    if [ ! -d ".acbuild" ]; then
+        echo ".acbuild does not exist, run '$0 prep' first."
+        exit 1
+    fi
+    sudo rm -rf *.aci
+
+    # build app package
+    load_meta
+    toilet -f smblock --filter border:metal '  setup.py  sdist  '
+    python3 setup.py sdist
+    sudo rm -rf MANIFEST manifest
+
+    # install app, assemble container files
+    acbuild copy dist/*tar.gz /$PKG_NAME
+    sudo acbuild run -- pip3 install --no-index --no-cache-dir --no-deps \
+                                     --upgrade /$PKG_NAME
+    sudo acbuild run -- rm -f /$PKG_NAME
+
+    acbuild copy ../reqs/caddy/caddy /caddy
+    acbuild copy Caddyfile /Caddyfile
+    acbuild copy start.sh /start.sh
+    sudo acbuild run -- chmod a+x /start.sh
+
+    # fix sudo perms - ssl certs broken due to perms in /etc/...
+    # how to fix correctly?
+    sudo chown -R $USER .acbuild
+    sudo chgrp -R $USER .acbuild
+
+    # wrap it up
+    acbuild write --overwrite $APP_NAME_LOW-$APP_VERSION.aci
+    toilet -f smblock --filter border:metal '  Done.  '
+fi
+
+
+# alpine attempt, doesn't work, can't build bcrypt and cffi
+#~ acbuild begin docker://alpine:3.5
+# bug: https://github.com/containers/build/issues/277
+#~ # https://github.com/containers/build/blob/master/Documentation/getting-started.md
+#~ sudo acbuild run -- apk update
+#~ # sudo acbuild run -- apk add 'python3=3.5.2-r9' py-cffi
+#~ sudo acbuild run -- apk add python3 py3-cffi
+

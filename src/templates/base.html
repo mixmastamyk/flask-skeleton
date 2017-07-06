@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %} — {{ fullname }}</title>
+
+    <!-- bootstrap-age -->
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+        integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+        crossorigin="anonymous">
+
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link rel="stylesheet"
+        href="/static/custom.css">
+    <link rel="stylesheet"
+        href="/static/fa-min.css">
+</head>
+<body class="bg-inverse">
+
+<header>
+    <nav class="fixed-top navbar navbar-toggleable-md navbar-inverse bg-inverse">
+        <div class="container">
+            <button class="navbar-toggler navbar-toggler-right"
+                data-target="#navbarSupportedContent"
+                data-toggle="collapse">
+                    <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a class="navbar-brand mr-4" href="/">
+                <img class="logo" src="/static/logo.svg">
+            </a>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog/">News</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/static/docs/index.html">Docs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/static/support.html">Support</a>
+                    </li>
+                </ul>
+                {% if current_user.is_authenticated %}
+                <form class="form-inline my-2 my-lg-0">
+                    <a class="btn btn-outline-secondary my-2 my-sm-0" type="submit"
+                        href="/security/logout">
+                        <span class="fa"></span> Logout</a>
+                {% else %}
+                <form class="form-inline my-2 my-lg-0">
+                    <a class="btn btn-success mx-3 my-2 my-sm-0"
+                       href="/security/register"  type="submit">
+                       <span class="fa"></span> Get Connected!</a>
+
+                    <a class="btn btn-primary my-2 my-sm-0" type="submit"
+                       href="/security/login?next=/">
+                       <span class="fa"></span> Login</a>
+                {% endif %}
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-fixed
+                {% if category == 'message' %}
+                    alert-info
+                {% elif category == 'error' %}
+                    alert-danger
+                {% else %}
+                    alert-{{ category }}
+                {% endif %} alert-dismissible fade show" role="alert">
+        <button class="close" data-dismiss="alert">&times;</button>
+            <strong>{{ category.title() }}:</strong>&nbsp; {{ message }} </br>
+    </div>
+    {% endfor %}
+{% endwith %}
+
+<main>
+<div class="container py-5">
+<!--[if IE]>
+<div class="alert alert-danger mt-4" role="alert">
+  <strong>Apologies,</strong> we do not support Internet Explorer.
+  A recent Firefox, Chrome, Safari, or Edge are recommended.
+</div>
+<![endif]-->
+{% block body %}
+
+{% endblock %}
+</div>
+</main>
+
+<footer class="footer bg-inverse pb-5">
+    <div class="container">
+        <div class="py-5 text-muted">
+            <div class="row">
+                <div class="col">
+
+                    <div class="text-muted ">
+                        <img class="logo" src="/static/logo.svg"><br>
+                        ©2017&nbsp;Company,&nbsp;LLC.
+                    </div>
+                </div>
+                <div class="col">
+                    &nbsp;
+                </div>
+                <div class="col">
+                    <h6 class="ml-2">site</h6>
+                    <ul class="fa-ul">
+                        <li><i class="fa-li fa fa-newspaper-o"></i>
+                            <a href="/blog/"> News</a></li>
+                        <li><i class="fa-li fa fa-book"></i>
+                            <a href="/docs/index.html">Docs</a></li>
+                        <li><i class="fa-li fa fa-briefcase"></i>
+                            <a href="/static/plans.html">Plans</a></li>
+                        <li><i class="fa-li fa fa-support"></i>
+                            <a href="/static/support.html">Support</a></li>
+                        <li><i class="fa-li fa fa-info-circle"></i>
+                            <a href="/static/about.html">About</a></li>
+                    </ul>
+                </div>
+
+                <div class="col">
+                    <h6 class="ml-2">links</h6>
+                    <ul class="bd-footer-links fa-ul">
+                        <li><i class="fa-li fa fa-github"></i>
+                            <a href="https://github.com/">GitHub</a></li>
+                        <li><i class="fa-li fa fa-twitter"></i>
+                            <a href="https://twitter.com/">Twitter</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+    integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+    crossorigin="anonymous"></script>
+<!-- for bootstrap tooltips -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+    integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+    crossorigin="anonymous"></script>
+<!-- end tooltips -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+    integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+    crossorigin="anonymous"></script>
+
+</body>
+</html>

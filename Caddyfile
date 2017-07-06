@@ -1,0 +1,27 @@
+http://:{$OS_PORT} {
+
+    #~ root {$PWD}/src/
+    root {$HTTP_STATIC_ROOT}
+
+    #~ proxy / localhost:5000 {
+    #~ proxy / unix:{$PWD}/gunicorn.sock {
+    proxy / {$WSGI_BIND} {
+        transparent
+        except /static
+    }
+    expvar /stats
+
+
+    gzip   # on the fly
+    log stdout
+
+    # protect against numbskulls
+    ratelimit / 2 3 second
+    ratelimit /security 1 1 second
+    limits {
+        header              100KB
+        body    /           100KB
+        body    /api        10KB
+        body    /upload     100MB
+    }
+}

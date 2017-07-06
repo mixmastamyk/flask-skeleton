@@ -1,0 +1,21 @@
+{% extends admin_base_template %}
+
+{% block head_tail %}
+        <link rel="stylesheet" href="/static/admin.css" >
+{% endblock %}
+
+
+{% block access_control %}
+                <form id="logout" class="form-inline my-2 my-lg-0 navbar-right"
+                    style="">
+                    <a class="btn btn-default my-2 my-sm-0" type="submit"
+                        href="{{ url_for_security('logout') }}">
+                        <i class="fa fa-unlock-alt glyphicon glyphicon-remove-sign"></i>
+                        Logout</a>
+                </form>
+
+                <div class="navbar-text navbar-right">
+                    {{ current_user.email }}
+                </div>
+{% endblock %}
+

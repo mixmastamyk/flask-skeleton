@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block body %}
+<div class="container py-5">
+    <br/>
+    <br/>
+
+    <div class="card mx-auto p-2" style="width: 20em;">
+        <div class="card-block">
+            <h4 class="card-title">Kindly Log In:</h4>
+
+            <form id="login" action="/login" method="post">
+                <input id="email" type="email" name="email"
+                       placeholder="foo@bar%com" required /><br/>
+                <input id="password" type="password" name="password"
+                       class="my-2" placeholder="password" required /><br/>
+                <input id="submit" type="submit" value="Submit"
+                       class="my-2 btn btn-primary" />
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+

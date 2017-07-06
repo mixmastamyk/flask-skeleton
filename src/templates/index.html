@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <h1>Hello World!</h1>
+
+    {% if current_user.is_authenticated %}
+        <p>Hi {{ current_user.email }}!
+        Welcome to {{ fullname }}.
+    {% endif %}
+
+    <p>
+        <i class="fa fa-hand-o-right"></i>
+        <i>Application stuff goes here.</i>
+        <i class="fa fa-hand-o-left"></i>
+    </p>
+
+    <h2>Links</h2>
+    <ul class="">
+        <li><a href="/users/{{ current_user.id }}">My User Profile Page</a></li>
+        <li><a href="/routes">Configured Routes</a></li>
+        <li><a href="/admin/">Admin</a></li>
+    </ul>
+
+</div>
+{% endblock %}

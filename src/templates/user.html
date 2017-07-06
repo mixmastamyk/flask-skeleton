@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+
+{% block body %}
+<div class="container py-5">
+
+    <h1>{{ title }}</h1>
+    <p>&nbsp;
+
+    <form method=post>
+        {{ form.hidden_tag() }}{#  ⟵ csrf tag  #}
+        <table class="table table-striped">
+            {% for field in form %}{% if field.type != 'CSRFTokenField'  %}
+            <tr>
+                <td><b>{{ field.label.text.title() }}:</b></td>
+                <td>{{ field(class_="form-control") }}
+                    {% if field.errors %}
+                    <ul class=errors>
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}{% endfor %}
+
+            <tr>
+                <td><b>Organization:</b></td>
+                <td>{{ current_user.org.name }}</td>
+            </tr>
+            <tr>
+                <td><b>Created at:</b></td>
+                <td>{{ current_user.created_at }} UTC</td>
+            </tr>
+            <tr>
+                <td><b>Confirmed at:</b></td>
+                <td>{{ current_user.confirmed_at }} UTC</td>
+            </tr>
+            <tr>
+                <td><b>Last login at:</b></td>
+                <td>{{ current_user.last_login_at }} UTC</td>
+            </tr>
+        </table>
+        <p><button class="btn btn-primary pull-right" type="submit">
+            <i class="fa fa-check"></i>
+            Submit
+           </button>
+    </form>
+    <ul class=errors>
+        {% for error in form.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+
+</div>
+{% endblock %}

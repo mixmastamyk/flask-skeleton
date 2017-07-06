@@ -1,0 +1,35 @@
+
+{% if security.registerable or security.recoverable or security.confirmable %}
+
+<div class="btn-group btn-group-sm my-2" role="group">
+    <a href="{{ url_for_security('login') }}{% if 'next' in request.args %}?next={{ request.args.next|urlencode }}{% endif %}"
+        class="btn btn-secondary{% if request.endpoint == 'security.login' %} disabled{% endif %}"
+        >Login</a>{# request.args.next|urlencode #}
+
+    {% if security.registerable %}
+    <a href="{{ url_for_security('register') }}{% if 'next' in request.args %}?next={{ request.args.next }}{% endif %}"
+        class="btn btn-secondary{% if request.endpoint == 'security.register' %} disabled{% endif %}"
+        >Register</a>
+    {% endif %}
+
+    {% if security.recoverable %}{# reset didn't work #}
+    <a href="/security/reset"
+        class="btn btn-secondary{% if request.endpoint == 'security.forgot_password' %} disabled{% endif %}"
+        >Forgot?</a>
+    {% endif %}
+
+    {% if security.confirmable %}
+    <a href="{{ url_for_security('send_confirmation') }}"
+        class="btn btn-secondary{% if request.endpoint == 'security.send_confirmation' %} disabled{% endif %}"
+        >Confirm</a>
+    {% endif %}
+</div>
+
+<div class="btn-group btn-group-sm my-2" role="group">
+    {% if security.changeable %}
+    <a href="{{ url_for_security('change_password') }}"
+        class="btn btn-secondary{% if request.endpoint == 'security.change_password' %} disabled{% endif %}"
+        >Change</a>
+    {% endif %}
+</div>
+{% endif %}

@@ -1,0 +1,18 @@
+
+body, .wy-body-for-nav {
+    background-color: #222 !important;   /* prevents white flicker */
+}
+
+.wy-nav-content-wrap {
+    /* lower white point, slight red shift for night time. */
+    background-color: #e4e2e0;
+}
+
+div.admonition {
+    border-radius: .4em;
+    margin-bottom: 1.5em;
+}
+
+p.admonition-title {
+    border-radius: .4em .4em 0 0;
+}
