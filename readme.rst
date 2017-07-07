@@ -6,7 +6,7 @@ Flask_Starter_App
 This project is meant to be a modern and "professional" project skeleton to
 start from,
 with "batteries included"
-rather than the toys found online so far.
+rather than the barebones toys found online so far.
 The functionality of Django with the breeziness of Flask.
 (Please don't call it "Flango," haha.)
 It includes:
@@ -71,27 +71,27 @@ It includes:
     as appropriate for debugging or systemd service.
 
 
+- Operations:
+
+
+  - ``mkaci`` - a script to create an ACI container for running under rkt.
+  - Caddy (reverse-proxy and https)
+
+    - Download: https://caddyserver.com/download
+    - ``Caddyfile`` - Configures caddy web server
+
+      - Basic ratelimiting
+    - ProxyFix enabled in Flask for headers:
+      http://esd.io/blog/flask-apps-heroku-real-ip-spoofing.html
+
+  - ``start.sh`` - rudimentary script to load gunicorn3 and caddy in
+    container.
+
+
 .. note::
 
     Am learning Flask as I go along,
     so improvements and pointers to best practices welcome.
-
-
-.. rubric:: Ops
-
-
-- ``mkaci`` - a script to create an ACI container for running under rkt.
-- Caddy (reverse-proxy and https)
-
-  - Download: https://caddyserver.com/download
-  - ``Caddyfile`` - Configures caddy web server
-
-    - Basic ratelimiting
-  - ProxyFix enabled in Flask for headers:
-    http://esd.io/blog/flask-apps-heroku-real-ip-spoofing.html
-
-- ``start.sh`` - rudimentary script to load gunicorn3 and caddy in
-  container.
 
 
 Introduction
