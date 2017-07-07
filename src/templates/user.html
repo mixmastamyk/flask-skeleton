@@ -3,10 +3,7 @@
 
 
 {% block body %}
-<div class="container py-5">
-
     <h1>{{ title }}</h1>
-    <p>&nbsp;
 
     <form method=post>
         {{ form.hidden_tag() }}{#  ⟵ csrf tag  #}
@@ -54,5 +51,4 @@
         {% endfor %}
     </ul>
 
-</div>
 {% endblock %}

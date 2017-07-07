@@ -6,8 +6,8 @@ body {
 
 main {
     background-color: #d4d0d0; /* slight red-shift */
-    padding-bottom: 5em;
-    min-height: 30rem;
+    padding: 5.5rem 0;
+    min-height: 40rem;
 }
 
 
@@ -17,9 +17,15 @@ footer {
 
 
 
-h1, h2, h3, h4, h5, h6, .h3 {
+h1, h2, h3, h4, h5, h6, .h2, .h3 {
     font-weight: bold;
+    margin-bottom: .4em;
 }
+/*
+h1, .h1 {
+    margin-bottom: 1.2rem;
+}
+*/
 h5, h6 {
     font-variant: small-caps;
 }
