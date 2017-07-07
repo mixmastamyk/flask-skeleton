@@ -11,7 +11,7 @@ from wtforms.fields import PasswordField
 #~ from wtforms.validators import Length
 
 from .main import admin, db
-from .models import (Orgs, Roles, Users)
+from .database import Orgs, Roles, Users
 #~ from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
 from .timezones import all_tz
 
@@ -57,8 +57,9 @@ class AdminModelView(ModelView):
     }
 
     def is_accessible(self):
-        ''' Prevent administration of models unless an admin, would prefer
-            better security. '''
+        ''' Prevent administration of models unless an admin.
+            (Better security needed.)
+        '''
         return current_user.admin
 
 

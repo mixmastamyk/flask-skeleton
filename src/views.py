@@ -13,7 +13,7 @@ from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from .main import app, db
-from .models import Users
+from .database import Users
 from .meta import fullname
 from .logcfg import log
 from .forms import UserForm

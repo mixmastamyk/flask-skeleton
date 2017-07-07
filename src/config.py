@@ -1,7 +1,7 @@
 '''
     This is the common config file.
 '''
-import sys, os
+import sys#, os
 import logging
 from os.path import abspath, dirname, join
 from datetime import timedelta

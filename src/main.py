@@ -29,10 +29,10 @@ migrate = Migrate(app, db)
 
 # additional imports below to avoid circular import issues with app, db, etc.
 from .logcfg import log
-from . import  models, forms, views, admin, utils
+from . import  database, models, forms, views, admin, utils
 
 # security package
-user_datastore = SQLAlchemyUserDatastore(db, models.Users, models.Roles)
+user_datastore = SQLAlchemyUserDatastore(db, database.Users, database.Roles)
 security = Security(app, user_datastore,
                     login_form=forms.ExLoginForm,
                     confirm_register_form=forms.ExRegForm,
@@ -43,39 +43,9 @@ security = Security(app, user_datastore,
 # flask-restless shenanigans:
 from .auth import rest_preprocessors
 api = APIManager(app, flask_sqlalchemy_db=db, preprocessors=rest_preprocessors)
-models.register_models_with_api(api)
-
-
-# modify jinja defaults, strip extra whitespace
-app.jinja_options = dict(**app.jinja_options.copy(),
-    trim_blocks=True,
-    lstrip_blocks=True,
-)
-
-
-def init_db(**kwargs):
-    ''' Make sure database is ready, and there's an admin user. '''
-    from datetime import datetime as dt
-    from sqlalchemy.exc import IntegrityError, InvalidRequestError
-
-    log.debug('creating tables')
-    db.create_all()
-    try:
-        usr_config = config.APP_DEFAULT_ADMIN_USER.copy()
-        usr_config.update(**kwargs)
-
-        log.debug('creating initial records')
-        o = models.Orgs(**config.APP_DEFAULT_ORG)
-        r = models.Roles(**config.APP_DEFAULT_ROLE, org=o)
-        u = models.Users(org=o, roles=r, admin=True, **usr_config)
-        u.confirmed_at = dt.utcnow()
-
-        db.session.add_all([r, o, u])
-        db.session.commit()
-
-    except (IntegrityError, InvalidRequestError) as err:
-        log.info('starter objects created already: %s', err)
-        db.session.rollback()
+# register models
+database.register_models_with_api(database, api)
+database.register_models_with_api(models, api)
 
 
 def on_shutdown():
@@ -91,10 +61,17 @@ if app.debug:
     toolbar = DebugToolbarExtension(app)
 else:
     # At startup, before-before first request.  Once with gunicorn --preload.
-    init_db()
+    database.init_db()
 
 
+
+# modify jinja defaults, strip extra whitespace
+app.jinja_options = dict(**app.jinja_options.copy(),
+    trim_blocks=True,
+    lstrip_blocks=True,
+)
+
+admin, utils, views  # noop - shut up pyflakes
 atexit.register(on_shutdown)  # still needs a signal handler
-admin; views;  # shut up pyflakes
 log.info('By your command…')
 

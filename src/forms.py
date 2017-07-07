@@ -1,3 +1,6 @@
+'''
+    Manually configured and automatic forms defined here.
+'''
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, SubmitField # BooleanField
 from wtforms.fields.html5 import EmailField
@@ -8,7 +11,7 @@ from flask_security.forms import (LoginForm, ConfirmRegisterForm,
                                   SendConfirmationForm, ForgotPasswordForm)
 
 from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
-from .models import Users
+from .database import Users
 
 ModelForm = model_form_factory(FlaskForm)
 
