@@ -75,6 +75,8 @@ It includes:
 
 
   - ``mkaci`` - a script to create an ACI container for running under rkt.
+
+    - use ``prep`` subcommand to do long-running tasks once.
   - Caddy (reverse-proxy and https)
 
     - Download: https://caddyserver.com/download
