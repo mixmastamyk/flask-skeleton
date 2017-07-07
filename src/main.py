@@ -61,7 +61,7 @@ if app.debug:
     toolbar = DebugToolbarExtension(app)
 else:
     # At startup, before-before first request.  Once with gunicorn --preload.
-    database.init_db()
+    database.initdb()
 
 
 

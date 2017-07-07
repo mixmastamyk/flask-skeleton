@@ -135,7 +135,8 @@ class Users(MultiTenantBase, UserMixin, db.Model):
         return '<%s %r>' % (self.__class__.__name__, self.email)
 
 
-def init_db(**kwargs):
+@app.cli.command()
+def initdb(**kwargs):
     ''' Make sure database is ready, and there's an admin user. '''
     from datetime import datetime as dt
     from sqlalchemy.exc import IntegrityError, InvalidRequestError
