@@ -26,7 +26,7 @@ It includes:
   - Common fields for inheritence
 
 - Automatic REST API for models
-- Admin configured @ ``/admin``
+- Admin on ``/admin``
 - Security:
 
   - Registration w/ email confirmation
