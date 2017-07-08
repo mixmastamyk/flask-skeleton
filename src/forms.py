@@ -39,6 +39,7 @@ class ExForgotPasswordForm(ForgotPasswordForm):
 # automated forms
 common_exclusions = tuple('password created_at updated_at'.split())
 
+
 class UserForm(ModelForm):
     class Meta:
         model = Users

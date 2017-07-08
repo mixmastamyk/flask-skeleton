@@ -27,7 +27,7 @@ jwt = JWT(app, auth_handler, load_user)
 
 
 # flask-restless shenanigans:
-#~ https://flask-restless.readthedocs.io/en/latest/processors.html
+# https://flask-restless.readthedocs.io/en/latest/processors.html
 keys = [
     'DELETE_RELATIONSHIP',
     'DELETE_RESOURCE',

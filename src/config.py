@@ -64,7 +64,7 @@ SECURITY_URL_PREFIX = APP_SECURITY_PREFIX
 # SQL Alchemy
 #~ SQLALCHEMY_DATABASE_URI = 'postgresql://username:password@server/dbname')
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(basedir, 'app.db')
-# now using logging and debug toolbar instead of echo:
+# now using logging and debug toolbar instead of sqla echo:
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = join(basedir, 'migrations')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -78,4 +78,4 @@ try:  # may overwrite vars above
     from config_local import *
     sys.path.pop()
 except ImportError:
-    log.info('local config not found.')  # not configured yet?
+    log.info('local config not found.')

@@ -1,5 +1,5 @@
 '''
-    Database tools and core models are contained here.
+    Core database tools and models are contained here.
 '''
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import encrypt_password, verify_password
@@ -13,8 +13,7 @@ from sqlalchemy import (
     Table,
     Text,
 )
-#~ from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from sqlalchemy.ext.declarative import declared_attr #, as_declarative
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy_utils import IPAddressType, TimezoneType
 
 from . import config
@@ -162,8 +161,7 @@ def initdb(**kwargs):
 
 
 def register_models_with_api(module, api):
-    ''' Add all BaseModel classes to API; as function to defer.
-        Modules now passed in to support multiple model modules. '''
+    ''' Add all Model classes to the Rest API. '''
     import inspect
 
     default_methods = [

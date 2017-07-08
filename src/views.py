@@ -36,7 +36,6 @@ def before_request():
 
     if not current_user.is_authenticated and endpoint:  # sometimes None
         if ((endpoint not in SKIP_LOGIN) and
-            #~ # (not endpoint.startswith('security.')) and
             (not request.blueprint == sec_bp) and
             (not endpoint.endswith('api')) ):
                 return redirect(url_for('security.login', next=request.path))
@@ -74,7 +73,6 @@ def show_user(uid):
             flash('User updated.', 'success')
         except SQLAlchemyError as err:
             log.error(str(err))
-            #~ log.warn('vars: %s', vars(err))
             db.session.rollback()
             flash('Database: %s' % err.orig, 'error')
 

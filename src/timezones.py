@@ -9,7 +9,7 @@ for priority in priorities:
     all_tz.remove(priority)
 
 all_tz = sorted(list(all_tz))
-all_tz[:0] = priorities  # prepend list to list
+all_tz[:0] = priorities  # prepends list to list
 
-all_tz = tuple((tz, tz) for tz in all_tz)  # tuples for selection widget
-
+# tuples for selection widget
+all_tz = tuple((tz, tz) for tz in all_tz)

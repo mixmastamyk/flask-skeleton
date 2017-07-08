@@ -18,7 +18,7 @@ from .timezones import all_tz
 
 class AdminModelView(ModelView):
     ''' Customize admin default behavior. '''
-    page_size = 50              # entries to display on the list view
+    page_size = 50                  # num entries to display on the list view
     can_export = True
     can_view_details = True
     column_editable_list = ('desc',)
@@ -33,7 +33,7 @@ class AdminModelView(ModelView):
         'last_login_ip',
         'password',
     )
-    column_labels = dict(desc='Description')        # full word for display
+    column_labels = dict(desc='Description')            # full word for display
     column_list = ('name', 'org', 'updated_at', 'desc')    # order
     column_searchable_list = ('name', 'desc')
     form_base_class = SecureForm

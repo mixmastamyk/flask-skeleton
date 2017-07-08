@@ -17,7 +17,7 @@
 
 
 # Add application models below
-#~ class Media(MultiTenantBase, db.Model):
-    #~ ''' Organization, aka multi-tenant model. '''
+#~ class Thing(MultiTenantBase, db.Model):
+    #~ ''' Descriptive_text_goes_here. '''
     #~ pass
 
