@@ -6,7 +6,7 @@ import logging;  log = logging.getLogger(__name__)  # fix
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form import SecureForm
 from flask_admin.form.fields import Select2Field
-from flask_security import current_user
+from flask_login import current_user
 from wtforms.fields import PasswordField
 #~ from wtforms.validators import Length
 

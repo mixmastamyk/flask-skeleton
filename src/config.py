@@ -23,6 +23,7 @@ APP_DEFAULT_ORG = dict(name='MyCompany, Inc.', desc='A big eastern syndicate')
 APP_DEFAULT_ROLE = dict(name='end-user', desc='Run of the mill user.')
 APP_MIN_PASSWD_LENGTH = 8
 APP_SECURITY_PREFIX = '/security'
+APP_FULLNAME = fullname
 
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 DEFAULT_TIMEZONE = 'America/Pacific'

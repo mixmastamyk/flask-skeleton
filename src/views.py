@@ -5,11 +5,11 @@ from os.path import join
 
 from flask import (
     flash,      # flash categories: success, (blank) info, warning, error
+    g,
     redirect,
     render_template as render,
     request,
-    #~ session,
-    url_for
+    url_for,
 )
 from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
@@ -17,7 +17,6 @@ from werkzeug.utils import secure_filename
 
 from .main import app, db
 from .database import Users
-from .meta import fullname
 from .logcfg import log
 from .forms import UserForm
 
@@ -47,7 +46,7 @@ def before_request():
 # simple example views
 @app.route('/')
 def index():
-    return render('index.html', title='Home', fullname=fullname)
+    return render('index.html', title='Home')
 
 
 @app.route('/routes')
@@ -55,14 +54,14 @@ def routes():
     rules = list(app.url_map.iter_rules())
     rules.sort(key=lambda r: r.rule)
 
-    return render('routes.html', title='Routes configured',
-                  fullname=fullname, routes=rules)
+    return render('routes.html', title='Routes configured', routes=rules)
 
 
-@app.route('/users/<int:uid>', methods=('GET', 'POST'))
-def show_user(uid):
+@app.route('/profile', methods=('GET', 'POST'))
+def show_profile():
     # get user and form
-    user = Users.query.filter_by(id=uid).first_or_404()
+    #~ user = Users.query.filter_by(id=uid).first_or_404()
+    user = current_user
     form = UserForm(obj=user)
     # http://wtforms-alchemy.readthedocs.io/en/latest/validators.html#using-unique-validator-with-existing-objects
     form.populate_obj(user)     # handle update + unique constraints
@@ -81,7 +80,7 @@ def show_user(uid):
 
         return redirect(url_for('show_user', uid=uid))
 
-    return render('user.html', title='User Page', fullname=fullname, form=form)
+    return render('profile.html', title='Profile Page', form=form)
 
 
 @app.route('/upload', methods = ['GET','POST'])
