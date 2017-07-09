@@ -2,17 +2,15 @@
     This is the common config file.
 '''
 import sys#, os
-import logging
 from os.path import abspath, dirname, join
 from datetime import timedelta
 
 from .meta import fullname
 
 basedir = abspath(dirname(__file__))
-log = logging.getLogger(__name__)
+
 
 # -- config values -----------------------------------------------------------
-
 
 # App custom config
 APP_API_PREFIX = '/api/v1'
@@ -84,4 +82,5 @@ try:  # may overwrite vars above
     from config_local import *
     sys.path.pop()
 except ImportError:
-    log.info('local config not found.')
+    from logcfg import log
+    log.warn('local config not found.')

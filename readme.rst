@@ -42,6 +42,12 @@ It includes:
 
     - JWT Token Authentication available from ``/security/auth``
 
+- Views:
+
+  - Welcome page
+  - User Profile page
+  - File upload page
+
 - Docs: ``readme.rst`` created and sphinx configured:
 
   - RTD theme.
