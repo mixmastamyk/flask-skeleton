@@ -3,28 +3,6 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
-    <div id=dialog class="modal fade hide" tabindex="-1">
-      <div class="modal-dialog" role=document>
-        <div class="modal-content bg-faded">
-          <div class="modal-header">
-            <h5 class="modal-title">
-
-            </h5>
-            <button type=button class=close data-dismiss=modal>
-                <span>&times;</span>
-            </button>
-          </div>
-          <div class="modal-body"><p>
-
-          </p></div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-dismiss="modal">
-                <i class="fa fa-check"></i> Ok</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <h1>{{ title }}</h1>
 
     <p>Media and data files may be uploaded using the form below.</p>
@@ -33,15 +11,15 @@
     <p>
         {# old-school look, more functionality #}
         <input id=files class="form-control" type=file name="files[]" multiple>
-
-        {# <!-- looks nicer but doesn't show selected files, except by tooltip.
+        {#
+            <!-- looks nicer but doesn't show selected files, except by tooltip.
             https://v4-alpha.getbootstrap.com/components/forms/#file-browser
             <label class="custom-file">
               <input id=files class="custom-file-input" type=file name="files[]"
                      multiple>
               <span class="custom-file-control"></span>
-            </label>
-        --> #}
+            </label>  -->
+        #}
     </p><p>
         <button class="btn btn-primary btn-lg pull-right" type=submit>
             <i class="fa fa-cloud-upload"></i> Upload
@@ -54,17 +32,10 @@
 
 {% block postscript %}
 <script>
-    "use strict";
+    'use strict';
     const unsavory_exts = Object.freeze(
                               new Set({{ config.UPLOAD_UNSAVORY_EXTS | safe }})
                           );
-
-    function show_msg_dialog(icon, title, body) {
-        $('#dialog .modal-title').html('<i class="fa fa-' + icon +
-                                          '"></i> ' + title);
-        $('#dialog .modal-body').html(body);
-        $('#dialog').modal('show');
-    }
 
     function check_unsavory_files(evt, files) {
         if (typeof(files) === 'undefined') {  // handle event and direct call.
@@ -97,7 +68,7 @@
         }
         return unsavory.length;
     }
-    // on file change
+    // on file selection change
     $('#files').change(check_unsavory_files)
 
     // upload on submit
