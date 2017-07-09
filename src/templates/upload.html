@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div id=dialog class="modal fade hide" tabindex="-1">
+      <div class="modal-dialog" role=document>
+        <div class="modal-content bg-faded">
+          <div class="modal-header">
+            <h5 class="modal-title">
+
+            </h5>
+            <button type=button class=close data-dismiss=modal>
+                <span>&times;</span>
+            </button>
+          </div>
+          <div class="modal-body"><p>
+
+          </p></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">
+                <i class="fa fa-close"></i> Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h1>{{ title }}</h1>
+
+    <p>Media and data files may be uploaded using the form below.</p>
+
+    <form id=upload_form method=POST enctype="multipart/form-data">
+    <p>
+        {# old-school look, more functionality #}
+        <input id=files class="form-control" type=file name="files[]" multiple>
+
+        {# <!--
+        looks nicer but doesn't show selected files, except by tooltip.
+        https://v4-alpha.getbootstrap.com/components/forms/#file-browser
+        <label class="custom-file">
+          <input id=files class="custom-file-input" type=file name="files[]"
+                 multiple>
+          <span class="custom-file-control"></span>
+        </label>
+        --> #}
+
+    </p><p>
+        <button class="btn btn-primary btn-lg pull-right" type=submit>
+            <i class="fa fa-cloud-upload"></i> Upload
+        </button>
+    </p>
+
+    </form>
+{% endblock %}
+
+{% block postscript %}
+<script>
+    const unsavory_exts = Object.freeze(['exe', 'cmd', 'bat', 'vbs', 'php']);
+
+    function show_dialog(icon, title, body) {
+        $('#dialog .modal-title').html('<i class="fa fa-' + icon +
+                                          '"></i> ' + title);
+        $('#dialog .modal-body').html(body);
+        $('#dialog').modal('show');
+    }
+    //~ function includes(arr, item) {  // compatibility
+        //~ return arr.indexOf(item) > -1
+    //~ }
+
+    function check_unsavory_files(evt, files) {
+        if (typeof(files) === 'undefined') {  // handle event and direct call.
+            files = evt.target.files;         // FileList object
+        }
+        let unsavory = [];
+
+        for (let file of files) {
+            const ext = file.name.split('.').pop();
+            console.debug(`check_files: ${file.name}, ${file.type}, ext: ${ext}`)
+            if (unsavory_exts.includes(ext)) {
+                console.log('    Unsupported file found: ' + file.name);
+                unsavory.push(file.name)
+            }
+        }
+
+        if (unsavory.length) {                // build text list
+            let text = '<p>\n';
+            for (let name of unsavory) {
+                text += '<i class="fa fa-file-code-o"></i> ' + name + '<br>\n'
+            }
+            text += '</p>\n'
+
+            {# multiline template caused highlighting issues below #}
+            show_dialog('exclamation-triangle', 'Warning:',
+                '<p>Unsupported file types were selected. ' +
+                'Kindly choose another set of files ' +
+                'with the Browse button.</p>\n' + text
+            )
+        }
+        return unsavory.length;
+    }
+    // on file change
+    $('#files').change(check_unsavory_files)
+
+    // upload on submit
+    $('#upload_form').submit(function(e) {
+        const files = $('#files')[0].files;
+
+        if (files.length === 0) {
+            console.debug('upload on_submit: No files were selected.');
+            show_dialog('exclamation-circle', 'Error:',
+                `No files were selected.  Kindly choose a file with the Browse…
+                 button and try again.`)
+            e.preventDefault();
+
+        } else if (check_unsavory_files(undefined, files)) {
+            console.log('upload on_submit: unsupported submission skipped.');
+            e.preventDefault();
+        }
+    });
+
+</script>
+{% endblock %}

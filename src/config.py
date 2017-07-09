@@ -60,7 +60,6 @@ SECURITY_TOKEN_MAX_AGE = 60 * 60    # seconds = 1 hour
 SECURITY_TRACKABLE = True           # needs fields
 SECURITY_URL_PREFIX = APP_SECURITY_PREFIX
 
-
 # SQL Alchemy
 #~ SQLALCHEMY_DATABASE_URI = 'postgresql://username:password@server/dbname')
 SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(basedir, 'app.db')
@@ -68,6 +67,11 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///' + join(basedir, 'app.db')
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = join(basedir, 'migrations')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# uploads
+MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8 mb
+UPLOADED_FILES_DEST = '/tmp'
+
 WTF_CSRF_ENABLED = True  # default, but just in case
 
 

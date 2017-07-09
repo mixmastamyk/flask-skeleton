@@ -1,6 +1,8 @@
 '''
     Controllers/views for the web interface are defined here.
 '''
+from os.path import join
+
 from flask import (
     flash,      # flash categories: success, (blank) info, warning, error
     redirect,
@@ -11,6 +13,7 @@ from flask import (
 )
 from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.utils import secure_filename
 
 from .main import app, db
 from .database import Users
@@ -79,4 +82,21 @@ def show_user(uid):
         return redirect(url_for('show_user', uid=uid))
 
     return render('user.html', title='User Page', fullname=fullname, form=form)
+
+
+@app.route('/upload', methods = ['GET','POST'])
+def upload_file():
+    if request.method =='POST':
+        files = request.files.getlist('files[]')
+        for f in files:
+            if f.filename == '':
+                flash('No files selected.', 'error')
+                return redirect(request.url)
+            filename = secure_filename(f.filename)
+            path = join(app.config['UPLOADED_FILES_DEST'], filename)
+            log.info('saving file as: %r', path)
+            f.save(path)
+            flash('File(s) uploaded.', 'success')
+
+    return render('upload.html', title='Uploads')
 

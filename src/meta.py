@@ -42,8 +42,8 @@ pkg_reqs        = (    # for setup.py
     'flask-sqlalchemy',
     'flask-wtf',
     'pytz',
-    'sqlalchemy_utils',
-    'wtforms_alchemy',
+    'sqlalchemy-utils',
+    'wtforms-alchemy',
 )
 pkg_docs_reqs = (
     'sphinx',
