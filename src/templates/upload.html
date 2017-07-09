@@ -19,7 +19,7 @@
           </p></div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" data-dismiss="modal">
-                <i class="fa fa-close"></i> Close</button>
+                <i class="fa fa-check"></i> Ok</button>
           </div>
         </div>
       </div>
@@ -34,16 +34,14 @@
         {# old-school look, more functionality #}
         <input id=files class="form-control" type=file name="files[]" multiple>
 
-        {# <!--
-        looks nicer but doesn't show selected files, except by tooltip.
-        https://v4-alpha.getbootstrap.com/components/forms/#file-browser
-        <label class="custom-file">
-          <input id=files class="custom-file-input" type=file name="files[]"
-                 multiple>
-          <span class="custom-file-control"></span>
-        </label>
+        {# <!-- looks nicer but doesn't show selected files, except by tooltip.
+            https://v4-alpha.getbootstrap.com/components/forms/#file-browser
+            <label class="custom-file">
+              <input id=files class="custom-file-input" type=file name="files[]"
+                     multiple>
+              <span class="custom-file-control"></span>
+            </label>
         --> #}
-
     </p><p>
         <button class="btn btn-primary btn-lg pull-right" type=submit>
             <i class="fa fa-cloud-upload"></i> Upload
@@ -53,44 +51,45 @@
     </form>
 {% endblock %}
 
+
 {% block postscript %}
 <script>
-    const unsavory_exts = Object.freeze(['exe', 'cmd', 'bat', 'vbs', 'php']);
+    "use strict";
+    const unsavory_exts = Object.freeze(
+                              new Set({{ config.UPLOAD_UNSAVORY_EXTS | safe }})
+                          );
 
-    function show_dialog(icon, title, body) {
+    function show_msg_dialog(icon, title, body) {
         $('#dialog .modal-title').html('<i class="fa fa-' + icon +
                                           '"></i> ' + title);
         $('#dialog .modal-body').html(body);
         $('#dialog').modal('show');
     }
-    //~ function includes(arr, item) {  // compatibility
-        //~ return arr.indexOf(item) > -1
-    //~ }
 
     function check_unsavory_files(evt, files) {
         if (typeof(files) === 'undefined') {  // handle event and direct call.
             files = evt.target.files;         // FileList object
         }
-        let unsavory = [];
+        const unsavory = [];                  // props mutable
 
         for (let file of files) {
             const ext = file.name.split('.').pop();
             console.debug(`check_files: ${file.name}, ${file.type}, ext: ${ext}`)
-            if (unsavory_exts.includes(ext)) {
-                console.log('    Unsupported file found: ' + file.name);
+            if (unsavory_exts.has(ext)) {
+                console.warn('    Unsupported file found: ' + file.name);
                 unsavory.push(file.name)
             }
         }
 
-        if (unsavory.length) {                // build text list
-            let text = '<p>\n';
+        if (unsavory.length) {
+            let text = '<p>\n';               // build text list
             for (let name of unsavory) {
                 text += '<i class="fa fa-file-code-o"></i> ' + name + '<br>\n'
             }
             text += '</p>\n'
 
             {# multiline template caused highlighting issues below #}
-            show_dialog('exclamation-triangle', 'Warning:',
+            show_msg_dialog('exclamation-triangle', 'Warning:',
                 '<p>Unsupported file types were selected. ' +
                 'Kindly choose another set of files ' +
                 'with the Browse button.</p>\n' + text
@@ -106,17 +105,16 @@
         const files = $('#files')[0].files;
 
         if (files.length === 0) {
-            console.debug('upload on_submit: No files were selected.');
-            show_dialog('exclamation-circle', 'Error:',
+            console.error('upload on_submit: No files were selected.');
+            show_msg_dialog('exclamation-circle', 'Error:',
                 `No files were selected.  Kindly choose a file with the Browse…
                  button and try again.`)
             e.preventDefault();
 
         } else if (check_unsavory_files(undefined, files)) {
-            console.log('upload on_submit: unsupported submission skipped.');
+            console.error('upload on_submit: unsupported files, skipped.');
             e.preventDefault();
         }
     });
-
 </script>
 {% endblock %}

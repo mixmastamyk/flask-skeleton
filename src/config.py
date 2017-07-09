@@ -71,6 +71,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 # uploads
 MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8 mb
 UPLOADED_FILES_DEST = '/tmp'
+UPLOAD_UNSAVORY_EXTS = ['bat', 'cmd', 'exe', 'iso', 'php', 'vbs']
 
 WTF_CSRF_ENABLED = True  # default, but just in case
 
