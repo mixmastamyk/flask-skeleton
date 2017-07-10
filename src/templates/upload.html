@@ -4,26 +4,32 @@
 
 {% block xtrahead %}
 <style type="text/css">
-    #droparea {
-        height: 11rem;
+    #droptarget {
+        border-color: rgba(34, 34, 34, .1);
         border-style: dashed;
         border-width: .15rem;
-        border-color: rgba(34, 34, 34, .1);
-        text-align: center;
-        zzmargin: 1.5em 0 2em 0;
+        height: 11rem;
+        /* margin: 1.5em 0 2em 0; */
         margin-top: 1.5em;
+        text-align: center;
     }
-    #droparea i.fa {
+    #droptarget i.fa {
         font-size: 10rem;
         opacity: .1;
     }
-    #droparea:hover, #droparea.hover {
+    #droptarget.hover {  /* :hover gives wrong impression, no files. */
         border-color: rgba(34, 34, 34, .3);
+        box-shadow: .06em .06em .2em rgba(0, 0, 0, .2);
+    }
+    #droptarget.hover i.fa {
+        opacity: .2;
     }
     progress {
-        width: 100%;
         background-color: inherit;
-        border: 0;
+        border: none;
+        zzcolor: white;
+        height: 1.2em;
+        width: 100%;
     }
 </style>
 {% endblock %}
@@ -31,19 +37,24 @@
 
 {% block body %}
     <h1>{{ title }}</h1>
-
-    <p> Media and data files may be uploaded by dropping them over the target
+    <p>
+        Media and data files may be uploaded by dropping them over the target
         below:
     </p>
 
     <form id=upload_form method=POST enctype="multipart/form-data">
 
-        <div id=droparea><i class="fa fa-cloud-upload"></i></div>
+        <div id=droptarget>
+            <i class="fa fa-cloud-upload"></i>
+        </div>
+        <p>
+            <progress id=progress class="" value=0 max=100>
+                Text here doesn't seem to work. :-(
+            </progress>
+        </p>
 
-        <p><progress id=progress value=0 max=100>hi-there</progress></p>
-
-        <h2>Old-School Upload</h2>
-        <p>This form is provided as an alternative.</p>
+        <h2>Old-School Upload Form</h2>
+        <p>This form is available as an alternative.</p>
         <p>
             {# old-school look, more functionality #}
             <input id=files class="form-control" type=file name="files[]" multiple>
@@ -61,127 +72,16 @@
                 <i class="fa fa-cloud-upload"></i> Upload
             </button>
         </p>
-
     </form>
 {% endblock %}
 
 
 {% block postscript %}
 <script>
-    'use strict';
-    const unsavory_exts = Object.freeze(
-                              new Set({{ config.UPLOAD_UNSAVORY_EXTS | safe }})
-                          );
-
-    function check_unsavory_files(evt, files) {
-        if (typeof(files) === 'undefined') {  // handle event and direct call.
-            files = evt.target.files;         // FileList object
-        }
-        const unsavory = [];                  // props mutable
-
-        for (let file of files) {
-            const ext = file.name.split('.').pop();
-            console.debug(`check_files: ${file.name}, ${file.type}, ext: ${ext}`)
-            if (unsavory_exts.has(ext)) {
-                console.warn('    Unsupported file found: ' + file.name);
-                unsavory.push(file.name)
-            }
-        }
-
-        if (unsavory.length) {
-            let text = '<p>\n';               // build text list
-            for (let name of unsavory) {
-                text += '<i class="fa fa-file-code-o"></i> ' + name + '<br>\n'
-            }
-            text += '</p>\n'
-
-            {# multiline template caused highlighting issues below #}
-            show_msg_dialog('exclamation-triangle', 'Warning:',
-                '<p>Unsupported file types were selected. ' +
-                'Kindly choose another set of files ' +
-                'with the Browse button.</p>\n' + text
-            )
-        }
-        return unsavory.length;
-    }
-    // on file selection change
-    $('#files').change(check_unsavory_files)
-
-    // upload on submit
-    $('#upload_form').submit(function(e) {
-        const files = $('#files')[0].files;
-
-        if (files.length === 0) {
-            console.error('upload on_submit: No files were selected.');
-            show_msg_dialog('exclamation-circle', 'Error:',
-                `No files were selected.  Kindly choose a file with the Browse…
-                 button and try again.`)
-            e.preventDefault();
-
-        } else if (check_unsavory_files(undefined, files)) {
-            console.error('upload on_submit: unsupported files, skipped.');
-            e.preventDefault();
-        }
-    });
-
-    // dragen-sie dropen-sie
-    let dragEndHandler = function(evt) {
-        evt.preventDefault();
-        console.debug('drag: stopped');
-        $('#droparea').removeClass('hover');
-    };
-
-    $('#droparea').on({
-        dragend: dragEndHandler,
-        dragexit: dragEndHandler,
-
-        dragover: function(evt) {
-                    evt.preventDefault();
-                    console.debug('drag: started');
-                    $('#droparea').addClass('hover');
-                },
-
-        drop: function(evt) {
-                    evt.preventDefault();
-                    let files = evt.originalEvent.dataTransfer.files;
-
-                    let fdata = new FormData();
-                    for (let f of files) {
-                        fdata.append('files[]', f, f.name);
-                    }
-
-                    // prepare request
-                    // jq slim build doesn't have .ajax
-                    console.log('drop: upload: starting...');
-                    let req = new XMLHttpRequest();
-
-                    // https://stackoverflow.com/a/12713090/450917
-                    let progid = 'progress';
-                    (function(id) {
-                        const progid = '#' + id;
-                        req.upload.onprogress = function(e) {
-                            console.log(`upload progress: ${e.loaded}/${e.total}`);
-                            $(progid).attr('value', e.loaded);
-                            $(progid).attr('max', e.total);
-                        };
-                    }(progid));
-
-                    req.upload.onload = function(e) {  // complete
-                        console.log('upload: complete');
-                        $('#droparea').removeClass('hover');
-                    };
-
-                    req.upload.onerror = function (evt) {
-                        evt.preventDefault();
-                        console.error('upload: ' + evt);
-                        $('#droparea').html('<i class="fa fa-times-circle"></i>');
-                    };
-
-                    req.open('POST', window.location.pathname);
-                    req.send(fdata);
-                    console.log('upload: request started.');
-                },
-    });
-
+'use strict';
+const unsavory_exts = Object.freeze( new Set(
+                            {{ config.UPLOAD_UNSAVORY_EXTS | safe }}
+                      ));
 </script>
+<script src="/static/upload.js"></script>
 {% endblock %}
