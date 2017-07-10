@@ -45,8 +45,8 @@ It includes:
 - Views:
 
   - Welcome page
-  - User Profile page
-  - File upload page
+  - User Profile page, on ``/profile``.
+  - File upload page (with multiple selection), on ``/upload``.
 
 - Docs: ``readme.rst`` created and sphinx configured:
 

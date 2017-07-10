@@ -1,7 +1,7 @@
 '''
     Controllers/views for the web interface are defined here.
 '''
-from os.path import join
+from os.path import join, splitext
 
 from flask import (
     flash,      # flash categories: success, (blank) info, warning, error
@@ -15,10 +15,11 @@ from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.utils import secure_filename
 
+from .config import UPLOAD_UNSAVORY_EXTS, UPLOADED_FILES_DEST
+from .forms import UserForm
+from .logcfg import log
 from .main import app, db
 from .database import Users
-from .logcfg import log
-from .forms import UserForm
 
 
 SKIP_LOGIN =  ('static', '_default_auth_request_handler')
@@ -83,16 +84,26 @@ def show_profile():
     return render('profile.html', title='Profile Page', form=form)
 
 
-@app.route('/upload', methods = ['GET','POST'])
+@app.route('/upload', methods=('GET', 'POST'))
 def upload_file():
     if request.method =='POST':
         files = request.files.getlist('files[]')
         for f in files:
-            if f.filename == '':
+            # double check for errors that made it thru javascript gauntlet:
+            filename = secure_filename(f.filename)
+            if filename == '':
                 flash('No files selected.', 'error')
                 return redirect(request.url)
-            filename = secure_filename(f.filename)
-            path = join(app.config['UPLOADED_FILES_DEST'], filename)
+
+            if splitext(filename)[1][1:] in UPLOAD_UNSAVORY_EXTS:
+                msg = ('An unsupported file type %r was uploaded, '
+                       'canceling submission.' % filename)
+                log.error(msg)
+                flash(msg, 'error')
+                # might be a good idea to record these to user account
+                return redirect(request.url)
+
+            path = join(UPLOADED_FILES_DEST, filename)
             log.info('saving file as: %r', path)
             f.save(path)
             flash('File(s) uploaded.', 'success')
