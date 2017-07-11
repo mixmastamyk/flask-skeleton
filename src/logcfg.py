@@ -1,5 +1,8 @@
 '''
     Set up and configure logging, custom levels, and filtering.
+
+    TODO: configure mail with:
+          http://flask.pocoo.org/docs/0.12/errorhandling/#error-mails
 '''
 import sys
 import logging

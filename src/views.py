@@ -110,3 +110,25 @@ def upload_file():
 
     return render('upload.html', title='Uploads')
 
+
+#~ @app.route('/upload_error', methods=('GET', 'POST'))
+#~ def upload_file_error():
+    #~ # return 'Bad Request!', 400
+    #~ return 'Server Kablooey', 500
+
+
+if app_debug:
+
+    @app.after_request
+    def log_status(response):
+        status_code = response.status_code
+
+        if 200 <= status_code < 400:
+            if app_debug:
+                log.debug(response.status)
+        elif 400 <= status_code < 500:
+            log.warn(response.status)
+        else:
+            log.error(response.status)
+
+        return response  # <-- important

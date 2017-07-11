@@ -29,7 +29,7 @@ migrate = Migrate(app, db)
 
 # additional imports below to avoid circular import issues with app, db, etc.
 from .logcfg import log
-from . import  database, models, forms, views, admin, utils
+from . import  database, models, forms, views, admin, utils, errors
 
 # security package
 user_datastore = SQLAlchemyUserDatastore(db, database.Users, database.Roles)

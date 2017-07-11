@@ -5,11 +5,8 @@
 {% block xtrahead %}
 <style type="text/css">
     #droptarget {
-        border-color: rgba(34, 34, 34, .1);
-        border-style: dashed;
-        border-width: .15rem;
+        border: .16rem dashed rgba(34, 34, 34, .1);
         height: 11rem;
-        /* margin: 1.5em 0 2em 0; */
         margin-top: 1.5em;
         text-align: center;
     }
@@ -17,7 +14,7 @@
         font-size: 10rem;
         opacity: .1;
     }
-    #droptarget.hover {  /* :hover gives wrong impression, no files. */
+    #droptarget.hover {  /* :hover w/out drag gives wrong impression. */
         border-color: rgba(34, 34, 34, .3);
         box-shadow: .06em .06em .2em rgba(0, 0, 0, .2);
     }
@@ -26,10 +23,22 @@
     }
     progress {
         background-color: inherit;
-        border: none;
-        zzcolor: white;
+        border: .16rem dashed rgba(34, 34, 34, .1);
+        border-top: none;
         height: 1.2em;
         width: 100%;
+
+        /* reset the default appearance */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+             appearance: none;
+    }
+    /* chrome/webkit stuff */
+    progress::-webkit-progress-bar {
+        background-color: inherit;
+    }
+    progress::-webkit-progress-value {
+        background-color: #0275d8;
     }
 </style>
 {% endblock %}
@@ -54,7 +63,7 @@
         </p>
 
         <h2>Old-School Upload Form</h2>
-        <p>This form is available as an alternative.</p>
+        <p>This form does not require javascript.</p>
         <p>
             {# old-school look, more functionality #}
             <input id=files class="form-control" type=file name="files[]" multiple>
@@ -80,8 +89,9 @@
 <script>
 'use strict';
 const unsavory_exts = Object.freeze( new Set(
-                            {{ config.UPLOAD_UNSAVORY_EXTS | safe }}
-                      ));
+    {{ config.UPLOAD_UNSAVORY_EXTS | safe }}
+));
 </script>
+
 <script src="/static/upload.js"></script>
 {% endblock %}
