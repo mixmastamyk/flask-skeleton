@@ -15,6 +15,6 @@ def handle_bad_request(err):
 @app.errorhandler(Exception)
 def handle_exception(err):
     msg = 'Err handler: Exception occurred: %s' % err
-    log.critical(msg)
+    log.error(msg)
     return msg
 

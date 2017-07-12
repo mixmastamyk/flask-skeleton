@@ -6,6 +6,7 @@ from os.path import join, splitext
 from flask import (
     flash,      # flash categories: success, (blank) info, warning, error
     g,
+    jsonify,
     redirect,
     render_template as render,
     request,
@@ -106,8 +107,16 @@ def upload_file():
             path = join(UPLOADED_FILES_DEST, filename)
             log.info('saving file as: %r', path)
             f.save(path)
-            flash('File(s) uploaded.', 'success')
 
+        # if this was an ajax request, return json instead of html
+        if request.accept_mimetypes.best == 'application/json':
+            log.debug('client prefers json, skipping page render.')
+            return jsonify(status='success',
+                           files=[ f.filename for f in files ])
+
+        flash('File(s) uploaded.', 'success')
+
+    # todo: check if xhr post and don't render page
     return render('upload.html', title='Uploads')
 
 

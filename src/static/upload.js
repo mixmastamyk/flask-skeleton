@@ -110,6 +110,8 @@ function upload_files(location, formdata) {
     req.onloadend = loadend_handler;
 
     req.open('POST', location);
+    // signal back-end to return json instead of full page:
+    req.setRequestHeader('Accept', 'application/json');
     req.send(formdata);
 }
 
