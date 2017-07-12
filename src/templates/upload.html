@@ -47,8 +47,8 @@
 {% block body %}
     <h1>{{ title }}</h1>
     <p>
-        Media and data files may be uploaded by dropping them over the target
-        below:
+        Media and data files (max: {{ config.MAX_CONTENT_LENGTH_MB }}MB) may be
+        uploaded by dropping them over the target below:
     </p>
 
     <form id=upload_form method=POST enctype="multipart/form-data">
@@ -91,6 +91,8 @@
 const unsavory_exts = Object.freeze( new Set(
     {{ config.UPLOAD_UNSAVORY_EXTS | safe }}
 ));
+const MAX_CONTENT_LENGTH = {{ config.MAX_CONTENT_LENGTH }};
+const DEBUG = {{ debug }};
 </script>
 
 <script src="/static/upload.js"></script>

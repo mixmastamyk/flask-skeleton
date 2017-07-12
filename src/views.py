@@ -87,6 +87,7 @@ def show_profile():
 
 @app.route('/upload', methods=('GET', 'POST'))
 def upload_file():
+
     if request.method =='POST':
         files = request.files.getlist('files[]')
         for f in files:
@@ -117,7 +118,7 @@ def upload_file():
         flash('File(s) uploaded.', 'success')
 
     # todo: check if xhr post and don't render page
-    return render('upload.html', title='Uploads')
+    return render('upload.html', title='Uploads', debug=int(app_debug))
 
 
 #~ @app.route('/upload_error', methods=('GET', 'POST'))
@@ -132,12 +133,11 @@ if app_debug:
     def log_status(response):
         status_code = response.status_code
 
-        if 200 <= status_code < 400:
-            if app_debug:
-                log.debug(response.status)
-        elif 400 <= status_code < 500:
+        if 200 <= status_code < 400:    # if app_debug:
+            log.debug(response.status)
+        elif 400 <= status_code < 500:  # client error
             log.warn(response.status)
-        else:
+        else:                           # server error
             log.error(response.status)
 
         return response  # <-- important

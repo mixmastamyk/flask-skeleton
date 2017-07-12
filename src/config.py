@@ -68,7 +68,9 @@ SQLALCHEMY_MIGRATE_REPO = join(basedir, 'migrations')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # uploads
-MAX_CONTENT_LENGTH = 8 * 1024 * 1024  # 8 mb
+MAX_CONTENT_LENGTH_MB = 8
+#~ MAX_CONTENT_LENGTH_MB = 32
+MAX_CONTENT_LENGTH = MAX_CONTENT_LENGTH_MB * 1024 * 1024
 UPLOADED_FILES_DEST = '/tmp'
 # var below needs to render in .gs, so leave as list:
 UPLOAD_UNSAVORY_EXTS = ['bat', 'cmd', 'exe', 'iso', 'php', 'vbs']
