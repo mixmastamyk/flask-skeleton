@@ -63,7 +63,9 @@
         </p>
 
         <h2>Old-School Upload Form</h2>
-        <p>This form does not require javascript.</p>
+        <p>The form below also has a(n)
+            {{ config.MAX_CONTENT_LENGTH_MB }}MB limit,
+            and does not require javascript.</p>
         <p>
             {# old-school look, more functionality #}
             <input id=files class="form-control" type=file name="files[]" multiple>

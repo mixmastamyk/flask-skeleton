@@ -91,42 +91,48 @@ $('#upload_form').submit(function (evt) {   // on submit button
 // ajax upload
 
 const completion_delay = 1200;  // ms
+const progbar = $('progress#progress');
+const droptarget = $('div#droptarget');
+
 
 function prog_handler(evt) {
-    console.debug(`upload progress: ${evt.loaded}/${evt.total}`);
-    $('#progress').attr('value', evt.loaded);
-    $('#progress').attr('max', evt.total);
+    if (evt.lengthComputable) {
+        console.debug(`upload progress: ${evt.loaded}/${evt.total}`);
+        progbar.attr('value', evt.loaded);
+        progbar.attr('max', evt.total);
+    } else {
+        console.debug('upload progress: not computable.');
+    }
 };
 
 function err_handler(evt) {
     // err handler only fires on low-level network errors, not most http
-    $('#droptarget').html('<i class="fa fa-times-circle"></i>');
+    droptarget.html('<i class="fa fa-times-circle"></i>');
     console.error('upload: ', err_network);
     show_err_dialog(err_network);
 };
 
 function loadend_handler(evt) {     // upon completion or http error
-    let req = evt.target;
-    let pb = $('#progress');
+    const req = evt.target;
 
     if (req.status == 200) {
-        pb.attr('max', 100);
-        pb.attr('value', 100);
-        $('#droptarget').html('<i class="fa fa-cloud-upload"></i>');
+        progbar.attr('max', 100);
+        progbar.attr('value', 100);
+        droptarget.html('<i class="fa fa-cloud-upload"></i>');
         const msg = render_server_resp(req, 'status');
         console.log('upload end:', msg.replace('<br>', ''));
 
         // reset progress bar, delay for perception of work with tiny files.
         setTimeout(function () {
-            $('#progress').attr('value', 0);
+            progbar.attr('value', 0);
         }, completion_delay);
 
     } else if (req.status == 0) {   // net error occurred, see err_handler.
         'no-op';
     } else {                        // http error occurred
-        pb.attr('max', 100);
-        pb.attr('value', 0);
-        $('#droptarget').html('<i class="fa fa-times-circle"></i>');
+        progbar.attr('max', 100);
+        progbar.attr('value', 0);
+        droptarget.html('<i class="fa fa-times-circle"></i>');
         const msg = render_server_resp(req, 'error');
         console.error('upload end:', msg);
         show_err_dialog(msg);
@@ -136,13 +142,13 @@ function loadend_handler(evt) {     // upon completion or http error
 function upload_files(location, formdata) {
     // prepare request, jq slim build no tiene .ajax
     console.log(`upload: to ${location} starting…`);
-    let req = new XMLHttpRequest();
+    const req = new XMLHttpRequest();
 
     // note: add the event listeners before calling open
-    req.onprogress = prog_handler;
-    req.onerror = err_handler;
-    req.onabort = err_handler;
-    req.onloadend = loadend_handler;
+    req.upload.onprogress = prog_handler;   // .upload.
+    req.upload.onerror = err_handler;
+    req.upload.onabort = err_handler;
+    req.onloadend = loadend_handler;        // not .upload.
 
     req.open('POST', location);
     // signal back-end to return json instead of full page:
@@ -157,10 +163,10 @@ function upload_files(location, formdata) {
 function drag_end_handler(evt) {
     evt.preventDefault();
     console.debug('drag: end/exit/leave');
-    $('#droptarget').removeClass('hover');
+    droptarget.removeClass('hover');
 };
 
-$('#droptarget').on({
+droptarget.on({
     dragend: drag_end_handler,
     dragexit: drag_end_handler,
     dragleave: drag_end_handler,
@@ -169,7 +175,7 @@ $('#droptarget').on({
         function (evt) {
             evt.preventDefault();
             console.debug('drag: enter');
-            $('#droptarget').addClass('hover');
+            droptarget.addClass('hover');
         },
 
     dragover:
@@ -181,7 +187,7 @@ $('#droptarget').on({
         function (evt) {
             evt.preventDefault();
             console.log('drop: occurred');
-            $('#droptarget').removeClass('hover');
+            droptarget.removeClass('hover');
 
             // what did we get?
             const files = evt.originalEvent.dataTransfer.files;

@@ -117,8 +117,15 @@ def upload_file():
 
         flash('File(s) uploaded.', 'success')
 
-    # todo: check if xhr post and don't render page
     return render('upload.html', title='Uploads', debug=int(app_debug))
+
+
+@app.route('/upload', methods=('PUT',))
+def upload_file_put():
+
+
+
+    return jsonify(status='success', files='UNK')
 
 
 #~ @app.route('/upload_error', methods=('GET', 'POST'))
@@ -128,9 +135,9 @@ def upload_file():
 
 
 if app_debug:
-
+    # Add more noticeable error logging.
     @app.after_request
-    def log_status(response):
+    def response(response):
         status_code = response.status_code
 
         if 200 <= status_code < 400:    # if app_debug:

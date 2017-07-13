@@ -13,6 +13,7 @@ ulimit -n $OS_NUM_FILES
 /usr/bin/gunicorn3                  \
     --workers $WSGI_NUM_WORKERS     \
     --bind $WSGI_BIND               \
+    --timeout 40                    \
     --preload                       \
     ${APP_NAME_LOW}".main:app"      &  # <-- background
 
