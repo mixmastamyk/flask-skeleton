@@ -30,6 +30,8 @@ const err_network =
     'A low-level network error occurred, or the connection was reset.';
 const err_nofiles = 'No files found in drop action.  Please try again.';
 
+const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
+
 
 // prevent known-skeezy file types from entering our upload list
 function check_unsavory_files(evt, files) {
@@ -59,8 +61,7 @@ function check_unsavory_files(evt, files) {
         filelist += '</p>\n'
 
         console.warn('upload:', render_err_unsavory(''));  // render w/o list
-        show_msg_dialog('exclamation-triangle', 'Error:',
-                        render_err_unsavory(filelist));
+        show_err_dialog(render_err_unsavory(filelist));
     }
     return unsavory.length;
 }
@@ -71,17 +72,17 @@ function check_unsavory_files(evt, files) {
 
 $('#files').change(check_unsavory_files)    // on file selection change
 $('#upload_form').submit(function (evt) {   // on submit button
-    const files = $('#files')[0].files;
-    evt.preventDefault();
+    const files = $('input#files')[0].files;
 
     if (files.length === 0) {
-
         const msg = render_err_zerofiles();
         console.error('upload on_submit:', msg);
         show_msg_dialog('exclamation-circle', 'Error:', msg);
+        evt.preventDefault();
 
     } else if (check_unsavory_files(null, files)) {
         console.error('upload on_submit: unsupported files, skipped.');
+        evt.preventDefault();
     }
 });
 
@@ -101,7 +102,7 @@ function err_handler(evt) {
     // err handler only fires on low-level network errors, not most http
     $('#droptarget').html('<i class="fa fa-times-circle"></i>');
     console.error('upload: ', err_network);
-    show_msg_dialog('exclamation-circle', 'Error:', err_network);
+    show_err_dialog(err_network);
 };
 
 function loadend_handler(evt) {     // upon completion or http error
@@ -128,7 +129,7 @@ function loadend_handler(evt) {     // upon completion or http error
         $('#droptarget').html('<i class="fa fa-times-circle"></i>');
         const msg = render_server_resp(req, 'error');
         console.error('upload end:', msg);
-        show_msg_dialog('exclamation-circle', 'Error:', msg);
+        show_err_dialog(msg);
     }
 };
 
@@ -202,7 +203,7 @@ $('#droptarget').on({
                 if (total_size > MAX_CONTENT_LENGTH) {
                     const msg = render_err_maxsize(loc, total_size);
                     console.error('upload:', msg);
-                    show_msg_dialog('exclamation-circle', 'Error:', msg);
+                    show_err_dialog(msg);
                     return
                 }
 
@@ -214,7 +215,7 @@ $('#droptarget').on({
                 upload_files(window.location.pathname, fdata);
             } else {
                 console.error('upload:', err_nofiles);
-                show_msg_dialog('exclamation-circle', 'Error:', err_nofiles);
+                show_err_dialog(err_nofiles);
             }
         },
 });
