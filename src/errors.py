@@ -14,7 +14,10 @@ def handle_bad_request(err):
 
 @app.errorhandler(Exception)
 def handle_exception(err):
-    msg = 'Err handler: Exception occurred: %s' % err
-    log.error(msg)
+    'needs traceback?'
+    #~ msg = 'Err handler: Exception occurred: %s' % err
+    msg = 'Err handler: Exception occurred: %s'
+    #~ log.error(msg)
+    log.exception(msg)
     return msg
 

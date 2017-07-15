@@ -16,7 +16,8 @@ from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.utils import secure_filename
 
-from .config import UPLOAD_UNSAVORY_EXTS, UPLOADED_FILES_DEST
+from .config import (UPLOAD_CHUNK_LENGTH, UPLOAD_UNSAVORY_EXTS,
+                     UPLOADED_FILES_DEST)
 from .forms import UserForm
 from .logcfg import log
 from .main import app, db
@@ -123,9 +124,30 @@ def upload_file():
 @app.route('/upload', methods=('PUT',))
 def upload_file_put():
 
+    filename = secure_filename(request.headers.get('X-File-Name','upload.dat'))
+    con_len = request.headers.get('Content-Length', 0)
 
+    if splitext(filename)[1][1:] in UPLOAD_UNSAVORY_EXTS:
+        msg = ('An unsupported file type %r was uploaded, '
+               'canceling submission.' % filename)
+        log.error(msg)
+        # might be a good idea to record these to user account
+        return jsonify(status='failure', reason='Unsupported file type.',
+                       file=dict(name=filename))
 
-    return jsonify(status='success', files='UNK')
+    path = join(UPLOADED_FILES_DEST, filename)
+    log.info('saving file as: %r', path)
+    with open(path, 'wb') as f:
+        while True:     # may be duplicating stream chunking?
+            chunk = request.stream.read(UPLOAD_CHUNK_LENGTH)
+            if chunk:
+                log.debug('saving chunk, size: %d', len(chunk))
+                f.write(chunk)
+            else:
+                break
+
+    return jsonify(status='success', path=path,
+                   file=dict(name=filename, size=con_len))
 
 
 #~ @app.route('/upload_error', methods=('GET', 'POST'))

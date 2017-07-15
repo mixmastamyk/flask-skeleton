@@ -42,6 +42,7 @@ function check_unsavory_files(evt, files) {
 
     for (let file of files) {
         const ext = file.name.split('.').pop();
+        file._ext = ext;  // save for later
         if (DEBUG) {
             console.debug(`check_files: ${file.name}, ${file.type}, size:
                ${loc.format(file.size)}  ext: ${ext}`.replace(/\s+/g, ' '));
@@ -54,7 +55,7 @@ function check_unsavory_files(evt, files) {
 
     // TODO: dialog building should be broken out to own function.
     if (unsavory.length) {
-        let filelist = '<p>\n';                 // build text list
+        let filelist = '<p>\n';                 // build text list, should join
         for (let name of unsavory) {
             filelist += '<i class="fa fa-file-code-o"></i> ' + name + '<br>\n'
         }
@@ -90,9 +91,11 @@ $('#upload_form').submit(function (evt) {   // on submit button
 // ---------------------------------------------------------------------------
 // ajax upload
 
-const completion_delay = 1200;  // ms
-const progbar = $('progress#progress');
-const droptarget = $('div#droptarget');
+const FILE_SIZE_THRESHOLD = 1000000;  // 1 MB
+const COMPLETION_DELAY = 1000;  // ms, for perception of work with tiny files.
+const droptarget = $('#droptarget');
+const progbar = $('progress#main');
+const uplist = $('#uplist');
 
 
 function prog_handler(evt) {
@@ -105,6 +108,7 @@ function prog_handler(evt) {
     }
 };
 
+
 function err_handler(evt) {
     // err handler only fires on low-level network errors, not most http
     droptarget.html('<i class="fa fa-times-circle"></i>');
@@ -112,20 +116,21 @@ function err_handler(evt) {
     show_err_dialog(err_network);
 };
 
+
 function loadend_handler(evt) {     // upon completion or http error
-    const req = evt.target;
+    const req = evt.target;  // this?
 
     if (req.status == 200) {
         progbar.attr('max', 100);
         progbar.attr('value', 100);
-        droptarget.html('<i class="fa fa-cloud-upload"></i>');
         const msg = render_server_resp(req, 'status');
         console.log('upload end:', msg.replace('<br>', ''));
 
-        // reset progress bar, delay for perception of work with tiny files.
+        // reset progress bar,
         setTimeout(function () {
             progbar.attr('value', 0);
-        }, completion_delay);
+            droptarget.html('<i class="fa fa-inbox"></i>');
+        }, COMPLETION_DELAY);
 
     } else if (req.status == 0) {   // net error occurred, see err_handler.
         'no-op';
@@ -139,26 +144,75 @@ function loadend_handler(evt) {     // upon completion or http error
     }
 };
 
-function upload_files(location, formdata) {
-    // prepare request, jq slim build no tiene .ajax
-    console.log(`upload: to ${location} starting…`);
-    const req = new XMLHttpRequest();
 
-    // note: add the event listeners before calling open
-    req.upload.onprogress = prog_handler;   // .upload.
-    req.upload.onerror = err_handler;
-    req.upload.onabort = err_handler;
-    req.onloadend = loadend_handler;        // not .upload.
+// send small files at once as a form
+function upload_files_form(location, formdata, numfiles) {
+    return new Promise( (resolve, reject) => {
 
-    req.open('POST', location);
-    // signal back-end to return json instead of full page:
-    req.setRequestHeader('Accept', 'application/json');
-    req.send(formdata);
-}
+        console.debug(`upload form: sending ${numfiles}
+                       small files as form to ${location}…`.replace(/\s+/g, ' '));
+        // prepare request, jq slim build no tiene .ajax
+        const req = new XMLHttpRequest();
+
+        // note: add the event listeners before calling open
+        req.upload.onprogress = prog_handler;   // .upload.
+        req.upload.onerror = err_handler;
+        req.upload.onabort = err_handler;
+        req.onloadend = loadend_handler;        // not .upload.
+        req.onload = resolve;                   // notify Promise
+        req.onerror = reject;
+
+        req.open('POST', location);
+        // signal back-end to return json instead of full page:
+        req.setRequestHeader('Accept', 'application/json');
+        req.send(formdata);
+
+    });
+};
+
+
+// send big files separately with a binary put
+function upload_file(location, file) {
+    return new Promise( (resolve, reject) => {
+
+        console.debug(`upload put: sending large file '${file.name}'
+                       to ${location}…`.replace(/\s+/g, ' '));
+        // prepare request, jq slim build no tiene .ajax
+        const req = new XMLHttpRequest();
+
+        // add the event listeners before calling open
+        req.upload.onprogress = prog_handler;   // note .upload.
+        req.upload.onerror = err_handler;
+        req.upload.onabort = err_handler;
+        req.onloadend = loadend_handler;        // download
+        req.onload = resolve;                   // notify Promise
+        req.onerror = reject;
+
+        req.open('PUT', location);
+        // signal back-end to return json instead of full page:
+        req.setRequestHeader('Accept', 'application/json');
+        req.setRequestHeader('X-File-Name', file.name);
+        // 'Content-Length' is automatic and not allowed to be set.
+        req.setRequestHeader('Content-Type', file.type);
+        req.send(file);
+    });
+};
 
 
 // ---------------------------------------------------------------------------
 // drag, drop handlers - could be moved
+
+// execute uploads in sequence
+async function exec_sequence(tasks) {
+    console.debug('exececute task sequence…');
+    let count = 0;
+    for (const task of tasks) {
+        console.debug('starting task:', count);
+        await task();
+        count++;
+    }
+}
+
 
 function drag_end_handler(evt) {
     evt.preventDefault();
@@ -188,6 +242,8 @@ droptarget.on({
             evt.preventDefault();
             console.log('drop: occurred');
             droptarget.removeClass('hover');
+            uplist.empty();
+            droptarget.html('<i class="fa fa-send"></i>');
 
             // what did we get?
             const files = evt.originalEvent.dataTransfer.files;
@@ -199,26 +255,58 @@ droptarget.on({
                     return
                 }
 
-                // check sizes first
-                let total_size = 0;
+                // check sizes second
+                let small_files = [], large_files = [], tasks = [],
+                    total_size = 0;
+
                 for (let file of files) {
                     total_size += file.size
+                    // sort
+                    if (file.size > FILE_SIZE_THRESHOLD) {
+                        large_files.push(file);
+                    } else {
+                        small_files.push(file);
+                    }
+                    //~ <li><progress id=f10 class=file value=25 max=100></progress>
+                        //~ <i class="fa fa-file-o"></i> Maracuja
+                    //~ </li><progress id=f10 class=file value=0
+                                        //~ max=100></progress>
+                    uplist.append(`\t<li id=f00>
+                                    <i id=stat class="fa fa-hourglass-half"></i>
+                                    <i class="fa fa-file-o"></i>
+                                    ${file.name}</li>`);
                 }
+
                 console.debug('upload: total file size:',
                                loc.format(total_size), 'bytes');
                 if (total_size > MAX_CONTENT_LENGTH) {
                     const msg = render_err_maxsize(loc, total_size);
                     console.error('upload:', msg);
                     show_err_dialog(msg);
+                    uplist.empty();
                     return
                 }
 
-                // add to form, b64 may cause slowdown
-                const fdata = new FormData();
-                for (let file of files) {
-                    fdata.append('files[]', file, file.name);
+                if (small_files.length) {
+                    const fdata = new FormData();
+                    for (let file of small_files) {
+                        fdata.append('files[]', file, file.name);
+                    }
+                    tasks.push( () =>  // defers
+                        upload_files_form(window.location.pathname, fdata,
+                                          small_files.length)
+                    );
                 }
-                upload_files(window.location.pathname, fdata);
+                // send each lg file separately
+                for (let file of large_files) {
+                    tasks.push( () =>  // defers
+                        upload_file(window.location.pathname, file)
+                    );
+                }
+
+                exec_sequence(tasks);  // do uploads in order
+
+
             } else {
                 console.error('upload:', err_nofiles);
                 show_err_dialog(err_nofiles);

@@ -2,12 +2,18 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% set hicolor = '#0275d8' %}
+
 {% block xtrahead %}
 <style type="text/css">
+
+    div#upbar {
+        margin-bottom: 1em;
+        margin-top: 1.5em;
+    }
     #droptarget {
         border: .16rem dashed rgba(34, 34, 34, .1);
         height: 11rem;
-        margin-top: 1.5em;
         text-align: center;
     }
     #droptarget i.fa {
@@ -23,9 +29,6 @@
     }
     progress {
         background-color: inherit;
-        border: .16rem dashed rgba(34, 34, 34, .1);
-        border-top: none;
-        height: 1.2em;
         width: 100%;
 
         /* reset the default appearance */
@@ -33,19 +36,57 @@
         -moz-appearance: none;
              appearance: none;
     }
+    progress#main {
+        border: .16rem dashed rgba(34, 34, 34, .1);
+        border-top: none;
+        height: 1.2em;
+    }
+    progress.file {
+        height: 1ex;
+        width: 2em;
+        border: 1px solid {{ hicolor }};
+        ZZdisplay: inline;
+        margin-right: .6em;
+    }
+    progress.file2 {
+        height: .3em;
+        width: 94%;
+        border: 1px solid {{ hicolor }};
+        zzdisplay: inline;
+        zzmargin-right: .25em;
+        zzmargin-top: -1em;
+    }
+
     /* chrome/webkit stuff */
     progress::-webkit-progress-bar {
         background-color: inherit;
     }
     progress::-webkit-progress-value {
-        background-color: #0275d8;
+        background-color: {{ hicolor }};
     }
+    zzselect#multi {
+        width: 100%;
+        height: 100%;
+    }
+
+    #uplist {
+        border: .16rem dashed rgba(34, 34, 34, .1);
+        border-left: 0;
+        zzfont-family: sans-serif;
+        height: 12.2rem;
+        overflow-y: auto;
+        padding: .5em;
+        padding-left: 1em;
+    }
+
+
+
 </style>
 {% endblock %}
 
 
 {% block body %}
-    <h1>{{ title }}</h1>
+    <h1><i class="fa fa-cloud-upload"></i> {{ title }}</h1>
     <p>
         Media and data files (max: {{ config.MAX_CONTENT_LENGTH_MB }}MB) may be
         uploaded by dropping them over the target below:
@@ -53,18 +94,32 @@
 
     <form id=upload_form method=POST enctype="multipart/form-data">
 
-        <div id=droptarget>
-            <i class="fa fa-cloud-upload"></i>
+        <div id=upbar class="row no-gutters">
+            <div class="col-lg-8">
+                <strong>Drop Target</strong>
+                <div id=droptarget>
+                    <i class="fa fa-inbox"></i>
+                </div>
+                <progress id=main class="" value=0 max=100></progress>
+            </div>
+            <div class="col-lg-4">
+                <strong>File List</strong>
+                <ul id=uplist class="list-unstyled">
+
+                    <li><progress id=f10 class=file value=25 max=100></progress>
+                        <i class="fa fa-file-o"></i> Maracuja
+                    </li>
+                    <li><progress id=f10 class=file value=50 max=100></progress>
+                        <i class="fa fa-file-o"></i> Maracuja
+                    </li>
+
+                </ul>
+            </div>
         </div>
-        <p>
-            <progress id=progress class="" value=0 max=100>
-                Text here doesn't seem to work. :-(
-            </progress>
-        </p>
 
         <h2>Old-School Upload Form</h2>
-        <p>The form below also has a(n)
-            {{ config.MAX_CONTENT_LENGTH_MB }}MB limit,
+        <p>The form below also has a limit of
+            {{ config.MAX_CONTENT_LENGTH_MB }}MB,
             and does not require javascript.</p>
         <p>
             {# old-school look, more functionality #}
@@ -95,7 +150,58 @@ const unsavory_exts = Object.freeze( new Set(
 ));
 const MAX_CONTENT_LENGTH = {{ config.MAX_CONTENT_LENGTH }};
 const DEBUG = {{ debug }};
+
+function scroll_down() {
+    const uplist = $('#uplist');
+    uplist.scrollTop(uplist.prop('scrollHeight'));
+}
+scroll_down();
+
 </script>
 
 <script src="/static/upload.js"></script>
 {% endblock %}
+
+
+<!--
+                <select id="multi" multiple>
+                  <option>○ Banana</option>
+                  <option>◔ Cherry</option>
+                  <option>◑ Lemon</option>
+                  <option>◕ Orange</option>
+                  <option>● Lemon</option>
+                  <option><progress value=25 max=100></progress> Lemon</option>
+                </select>
+                    <li>○ Banana</li>
+                    <li>◔ Cherry</li>
+                    <li>◑ Lemon</li>
+                    <li>◕ Orange</li>
+                    <li>● Mango</li>
+
+                    <li>○ Banana</li>
+                    <li>◔ Cherry</li>
+                    <li>◑ Lemon</li>
+                    <li>◑ Lemon</li>
+                    <li>◕ Orange</li>
+                    <li>● Mango</li>
+                    <li>
+                        <i class="fa fa-file"></i> Maracuja Maracuja.jpeg
+                        <progress id=f10 class=file2 value=75 max=100></progress>
+                    </li>
+                    <li>
+                        <i class="fa fa-file"></i> Maracuja
+                        <progress id=f10 class=file2 value=75 max=100></progress>
+                    </li>
+
+                    <li>▏▏Mango</li>
+                    <li>▎▏Mango</li>
+                    <li>▍▏Mango</li>
+                    <li><span style="color: {{ hicolor }}; background: #eee">▌</span> Mango</li>
+                    <li>▋▏Mango</li>
+                    <li>▊▏Mango</li>
+                    <li>▉▏Mango</li>
+                    <li>█▏Mango</li>
+                    <li>☑▏Mango</li>
+                    <li><span style="color: {{ hicolor }};">█▏</span> Mango</li>
+                    <li><span style="color: {{ hicolor }};">85%</span> Mango</li>
+-->
