@@ -18,7 +18,7 @@ const render_err_maxsize = (loc, total_size) =>
     .replace(/\s+/g, ' ');  // normalizes string for console log
 const render_err_unsavory = (filelist) =>
     `Unsupported file types were selected. Kindly drop another set of files or
-    select with the Browse… (Choose files) button. ${filelist}`
+    select with the Browse… (Choose files) button.  ${filelist}`
     .replace(/\s+/g, ' ');
 const render_err_zerofiles = () =>
     `No files were selected.  Kindly choose a file with the Browse…
@@ -55,14 +55,14 @@ function check_unsavory_files(evt, files) {
 
     // TODO: dialog building should be broken out to own function.
     if (unsavory.length) {
-        let filelist = '<p>\n';                 // build text list, should join
+        let filelist = ['<p>'];
         for (let name of unsavory) {
-            filelist += '<i class="fa fa-file-code-o"></i> ' + name + '<br>\n'
+            filelist.push(`<i class="fa fa-file-code-o ml-4"></i> ${name}<br>`);
         }
-        filelist += '</p>\n'
+        filelist.push('</p>');
 
         console.warn('upload:', render_err_unsavory(''));  // render w/o list
-        show_err_dialog(render_err_unsavory(filelist));
+        show_err_dialog(render_err_unsavory(filelist.join('\n')));
     }
     return unsavory.length;
 }
@@ -72,7 +72,7 @@ function check_unsavory_files(evt, files) {
 // traditional upload form
 
 $('#files').change(check_unsavory_files)    // on file selection change
-$('#upload_form').submit(function (evt) {   // on submit button
+$('#upload_form').submit( (evt) => {   // on submit button
     const files = $('input#files')[0].files;
 
     if (files.length === 0) {
@@ -127,7 +127,7 @@ function loadend_handler(evt) {     // upon completion or http error
         console.log('upload end:', msg.replace('<br>', ''));
 
         // reset progress bar,
-        setTimeout(function () {
+        setTimeout( () => {
             progbar.attr('value', 0);
             droptarget.html('<i class="fa fa-inbox"></i>');
         }, COMPLETION_DELAY);
@@ -191,9 +191,9 @@ function upload_file(location, file) {
         req.open('PUT', location);
         // signal back-end to return json instead of full page:
         req.setRequestHeader('Accept', 'application/json');
-        req.setRequestHeader('X-File-Name', file.name);
-        // 'Content-Length' is automatic and not allowed to be set.
         req.setRequestHeader('Content-Type', file.type);
+        // 'Content-Length' is automatic and not allowed to be set.
+        req.setRequestHeader('X-File-Name', file.name);
         req.send(file);
     });
 };
@@ -204,11 +204,11 @@ function upload_file(location, file) {
 
 // execute uploads in sequence
 async function exec_sequence(tasks) {
-    console.debug('exececute task sequence…');
+    console.debug('execute task sequence…');
     let count = 0;
     for (const task of tasks) {
         console.debug('starting task:', count);
-        await task();
+        await task();  // create Promise and wait for it
         count++;
     }
 }
@@ -220,97 +220,93 @@ function drag_end_handler(evt) {
     droptarget.removeClass('hover');
 };
 
+
 droptarget.on({
     dragend: drag_end_handler,
     dragexit: drag_end_handler,
     dragleave: drag_end_handler,
+    dragenter: (evt) => {
+        evt.preventDefault();
+        console.debug('drag: enter');
+        droptarget.addClass('hover');
+    },
+    dragover: (evt) => {
+        evt.preventDefault();  // yes, this is needed.
+    },
 
-    dragenter:
-        function (evt) {
-            evt.preventDefault();
-            console.debug('drag: enter');
-            droptarget.addClass('hover');
-        },
+    drop: (evt) => {
+        evt.preventDefault();
+        console.log('drop: occurred');
+        droptarget.removeClass('hover');
+        uplist.empty();
+        droptarget.html('<i class="fa fa-send"></i>');
 
-    dragover:
-        function (evt) {
-            evt.preventDefault();  // yes, this is needed.
-        },
+        // what did we get?
+        const files = evt.originalEvent.dataTransfer.files;
+        if (files.length) {
 
-    drop:
-        function (evt) {
-            evt.preventDefault();
-            console.log('drop: occurred');
-            droptarget.removeClass('hover');
-            uplist.empty();
-            droptarget.html('<i class="fa fa-send"></i>');
-
-            // what did we get?
-            const files = evt.originalEvent.dataTransfer.files;
-            if (files.length) {
-
-                if (check_unsavory_files(null, files)) {
-                    // this is the second error msg delivered, needs refr.
-                    console.error('upload submit: unsupported files, skipped.');
-                    return
-                }
-
-                // check sizes second
-                let small_files = [], large_files = [], tasks = [],
-                    total_size = 0;
-
-                for (let file of files) {
-                    total_size += file.size
-                    // sort
-                    if (file.size > FILE_SIZE_THRESHOLD) {
-                        large_files.push(file);
-                    } else {
-                        small_files.push(file);
-                    }
-                    //~ <li><progress id=f10 class=file value=25 max=100></progress>
-                        //~ <i class="fa fa-file-o"></i> Maracuja
-                    //~ </li><progress id=f10 class=file value=0
-                                        //~ max=100></progress>
-                    uplist.append(`\t<li id=f00>
-                                    <i id=stat class="fa fa-hourglass-half"></i>
-                                    <i class="fa fa-file-o"></i>
-                                    ${file.name}</li>`);
-                }
-
-                console.debug('upload: total file size:',
-                               loc.format(total_size), 'bytes');
-                if (total_size > MAX_CONTENT_LENGTH) {
-                    const msg = render_err_maxsize(loc, total_size);
-                    console.error('upload:', msg);
-                    show_err_dialog(msg);
-                    uplist.empty();
-                    return
-                }
-
-                if (small_files.length) {
-                    const fdata = new FormData();
-                    for (let file of small_files) {
-                        fdata.append('files[]', file, file.name);
-                    }
-                    tasks.push( () =>  // defers
-                        upload_files_form(window.location.pathname, fdata,
-                                          small_files.length)
-                    );
-                }
-                // send each lg file separately
-                for (let file of large_files) {
-                    tasks.push( () =>  // defers
-                        upload_file(window.location.pathname, file)
-                    );
-                }
-
-                exec_sequence(tasks);  // do uploads in order
-
-
-            } else {
-                console.error('upload:', err_nofiles);
-                show_err_dialog(err_nofiles);
+            if (check_unsavory_files(null, files)) {
+                // this is the second error msg delivered, needs refr.
+                console.error('upload submit: unsupported files, skipped.');
+                droptarget.html('<i class="fa fa-inbox"></i>');
+                return
             }
-        },
+
+            // check sizes second
+            let small_files = [], large_files = [], tasks = [],
+                total_size = 0;
+
+            for (let file of files) {
+                total_size += file.size
+                // sort
+                if (file.size > FILE_SIZE_THRESHOLD) {
+                    large_files.push(file);
+                } else {
+                    small_files.push(file);
+                }
+                //~ <li><progress id=f10 class=file value=25 max=100></progress>
+                    //~ <i class="fa fa-file-o"></i> Maracuja
+                //~ </li><progress id=f10 class=file value=0
+                                    //~ max=100></progress>
+                uplist.append(`<li id=f00>
+                               <i id=stat class="fa fa-hourglass-half mr-2"
+                                   ></i>
+                               <i class="fa fa-file-o"></i>
+                               ${file.name}</li>`);
+            }
+
+            console.debug('upload: total file size:',
+                           loc.format(total_size), 'bytes');
+            if (total_size > MAX_CONTENT_LENGTH) {
+                const msg = render_err_maxsize(loc, total_size);
+                console.error('upload:', msg);
+                show_err_dialog(msg);
+                uplist.empty();
+                return
+            }
+
+            if (small_files.length) {
+                const fdata = new FormData();
+                for (let file of small_files) {
+                    fdata.append('files[]', file, file.name);
+                }
+                tasks.push( () =>  // defers
+                    upload_files_form(window.location.pathname, fdata,
+                                      small_files.length)
+                );
+            }
+            // send each lg file separately
+            for (let file of large_files) {
+                tasks.push( () =>  // defers
+                    upload_file(window.location.pathname, file)
+                );
+            }
+            exec_sequence(tasks);  // do async uploads in order :-P
+
+        } else {
+            console.error('upload:', err_nofiles);
+            show_err_dialog(err_nofiles);
+        }
+    },
 });
 
