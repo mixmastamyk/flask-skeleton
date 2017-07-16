@@ -3,9 +3,7 @@
 //
 'use strict';
 
-// Create a number formatter
-const locale = 'en-US';  // mv to template
-const loc = new Intl.NumberFormat(locale);
+const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
 
 // deferred string templates for error messages, utilizing arrow functions.
 const render_err_maxsize = (loc, total_size) =>
@@ -22,13 +20,103 @@ const render_err_zerofiles = () =>
     `No files were selected.  Kindly choose a file with the Browse…
      (Choose files) button and try again.`.replace(/\s+/g, ' ');
 const render_server_resp = (req, type) =>
-    `The server responded with the ${type} message:<br>
-     ${req.status} ${req.statusText}`.replace(/\s+/g, ' ');
+    `The server responded with the ${type} message:
+     <p>${req.status} ${req.statusText}`.replace(/\s+/g, ' ');
 const err_network =
     'A low-level network error occurred, or the connection was reset.';
 const err_nofiles = 'No files found in drop action.  Please try again.';
 
 const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
+
+
+// ---------------------------------------------------------------------------
+// view implementation details
+
+const droptarget = $('#droptarget');
+const progbar = $('progress#main');
+const uplist = $('#uplist');
+const iconmap = {
+    'text/css': 'file-code-o',
+    'text/html': 'file-code-o',
+    'application/pdf': 'file-pdf-o',
+    'application/zip': 'file-zip-o',
+};
+
+
+droptarget.set_icon = function (name) {
+    this.html(`<i class="fa fa-${name}"></i>`);
+};
+droptarget.show_busy  = function () { this.set_icon('send'); };
+droptarget.show_error = function () { this.set_icon('times-circle'); };
+droptarget.show_ready = function () { this.set_icon('inbox'); };
+
+
+function set_icon(icons, name) {
+    icons.addClass('fa-' + name).removeClass('fa-hourglass-half');
+}
+
+function show_results(success) {                        // form instructions
+    const icons = $('#uplist i.stat');                  // change all icons
+    if (success) {
+        set_icon(icons, 'check');
+    } else {
+        set_icon(icons, 'times');
+    };
+}
+
+function show_single_result(success) {                  // put instructions
+    const icon = $('#uplist li:last-child i.stat');     // change one icon
+    if (success) {
+        set_icon(icon, 'check');
+    } else {
+        set_icon(icon, 'times');
+    };
+}
+
+
+function scroll_it_down(element) {  // watch out!  https://youtu.be/RZUq6N7Gx1c
+    element.scrollTop(element.prop('scrollHeight'));
+}
+
+
+// add an upload to the file list
+function add_to_uplist(manifest) {
+    for (const file of manifest) {
+        uplist.append(`
+            <li id=f00>
+                <div class="d-flex">
+                    <div class="icons">
+                        <i class="stat fa fa-hourglass-half pr-1"></i>
+                        <i class="fa fa-${type_to_icon(file.type)}"></i>
+                    </div>
+                    <div class="pl-1">${file.name}</div>
+                </div>
+            </li>
+        `);
+        scroll_it_down(uplist);
+    }
+};
+
+
+// convert a type into a fa icon
+function type_to_icon(mimetype) {
+    let icon = iconmap[mimetype];
+    if (!icon) {
+        const type = mimetype.split('/', 1)[0];
+        switch(type) {
+            case 'audio':
+            case 'image':
+            case 'text':
+            case 'video':
+                icon = `file-${type}-o`;  break;
+            case 'application':
+                icon = 'file-code-o';  break;
+            default:
+                icon = 'file-o';
+        };
+    };
+    return icon
+};
 
 
 // prevent known-skeezy file types from entering our upload list
@@ -45,13 +133,13 @@ function check_unsavory_files(evt, files) {
             console.debug(`check_files: ${file.name}, ${file.type}, size:
                ${loc.format(file.size)}  ext: ${ext}`.replace(/\s+/g, ' '));
         }
-        if (unsavory_exts.has(ext)) {
+        if (UPLOAD_UNSAVORY_EXTS.has(ext)) {  // from config, template
             console.warn('    Unsupported file found: ' + file.name);
             unsavory.push(file.name);
         }
     }
 
-    // TODO: dialog building should be broken out to own function.
+    // TODO: dialog error should be broken out to own function.
     if (unsavory.length) {
         const filelist = ['<p>'];
         for (const name of unsavory) {
@@ -69,7 +157,7 @@ function check_unsavory_files(evt, files) {
 // traditional upload form
 
 $('#files').change(check_unsavory_files)    // on file selection change
-$('#upload_form').submit( (evt) => {   // on submit button
+$('#upload_form').submit( (evt) => {        // on submit button
     const files = $('input#files')[0].files;
 
     if (files.length === 0) {
@@ -88,20 +176,7 @@ $('#upload_form').submit( (evt) => {   // on submit button
 // ---------------------------------------------------------------------------
 // ajax upload
 
-const FILE_SIZE_THRESHOLD = 1000000;  // 1 MB
-const COMPLETION_DELAY = 1000;  // ms, for perception of work with tiny files.
-const droptarget = $('#droptarget');
-const progbar = $('progress#main');
-const uplist = $('#uplist');
-
-
-// rm a bit of implementation detail
-droptarget.set_icon = function (name) {
-    this.html('<i class="fa fa-' + name + '"></i>');
-};
-droptarget.show_busy  = function () { this.set_icon('send'); };
-droptarget.show_error = function () { this.set_icon('times-circle'); };
-droptarget.show_ready = function () { this.set_icon('inbox'); };
+const COMPLETION_DELAY = 2000;  // ms, for perception of work with tiny files.
 
 
 function prog_handler(evt) {
@@ -115,8 +190,15 @@ function prog_handler(evt) {
 };
 
 
+function start_handler(evt) {
+    console.debug('upload: start…');
+    progbar.attr('value', 0);
+    progbar.attr('max', 100);
+};
+
+
 function err_handler(evt) {
-    // err handler only fires on low-level network errors, not most http
+    // err handler only fires on low-level network errors, not most http errs
     console.error('upload: ', err_network);
     droptarget.show_error();
     show_err_dialog(err_network);
@@ -126,36 +208,22 @@ function err_handler(evt) {
 function loadend_handler(evt) {     // upon completion or http error
     const req = evt.target;
 
-    if (req.status == 200) {
-        progbar.attr('max', 100);
-        progbar.attr('value', 100);
+    if (req.status >= 200 && req.status < 300) {
+        //~ progbar.attr('max', 100);   // progress does this
+        //~ progbar.attr('value', 100);
         const msg = render_server_resp(req, 'status');
-        console.log('upload end:', msg.replace('<br>', ''));
+        console.log('upload end:', rmtags(msg));
+        req._show_results(true);
 
-        if (req._mode === 'form') {
-            $('#uplist i.stat')  // change icons on all for form
-                .addClass('fa-check')
-                .removeClass('fa-hourglass-half');
-        } else {
-            $('#uplist i.stat').last()  // change last icon
-                .addClass('fa-check')
-                .removeClass('fa-hourglass-half');
-        }
-
-        // reset progress bar,
-        setTimeout( () => {
-            progbar.attr('value', 0);
-            droptarget.set_icon('inbox');
-        }, COMPLETION_DELAY);
-
-    } else if (req.status == 0) {   // net error occurred, see err_handler.
+    } else if (req.status == 0) {       // net error occurred, see err_handler.
         'no-op';
-    } else {                        // http error occurred
+    } else {                            // http error occurred
         progbar.attr('max', 100);
         progbar.attr('value', 0);
         droptarget.show_error();
         const msg = render_server_resp(req, 'error');
-        console.error('upload end:', msg);
+        console.error('upload end:', rmtags(msg));
+        req._show_results();
         show_err_dialog(msg);
     }
 };
@@ -169,15 +237,16 @@ function upload_files_form(location, formdata, numfiles) {
                        small files as form to ${location}…`.replace(/\s+/g, ' '));
         // prepare request, jq slim build no tiene .ajax
         const req = new XMLHttpRequest();
-        req._mode = 'form';  // signal to loadend handler how to handle icon
 
         // note: add the event listeners before calling open
-        req.upload.onprogress = prog_handler;   // .upload.
+        req.upload.onabort = err_handler;       // .upload.
         req.upload.onerror = err_handler;
-        req.upload.onabort = err_handler;
-        req.onloadend = loadend_handler;        // not .upload.
+        req.upload.onloadstart = start_handler;
+        req.upload.onprogress = prog_handler;
+        req.onloadend = loadend_handler;        // download
         req.onload = resolve;                   // notify Promise
         req.onerror = reject;
+        req._show_results = show_results;
 
         req.open('POST', location);
         // signal back-end to return json instead of full page:
@@ -196,15 +265,16 @@ function upload_file(location, file) {
                        to ${location}…`.replace(/\s+/g, ' '));
         // prepare request, jq slim build no tiene .ajax
         const req = new XMLHttpRequest();
-        req._mode = 'put';  // signal to loadend handler how to handle icon
 
         // add the event listeners before calling open
-        req.upload.onprogress = prog_handler;   // note .upload.
+        req.upload.onabort = err_handler;       // note .upload.
         req.upload.onerror = err_handler;
-        req.upload.onabort = err_handler;
+        req.upload.onloadstart = start_handler;
+        req.upload.onprogress = prog_handler;
         req.onloadend = loadend_handler;        // download
         req.onload = resolve;                   // notify Promise
         req.onerror = reject;
+        req._show_results = show_single_result;
 
         req.open('PUT', location);
         // signal back-end to return json instead of full page:
@@ -228,15 +298,23 @@ function sleep(ms) {
 // do async uploads in order :-P
 async function exec_sequence(tasks) {
     console.debug('execute task sequence…');
-    let count = 0;
-    for (const task of tasks) {
-        console.debug('upload: starting task:', count);
-        await task();  // create Promise and wait for it
+    for (let [manifest, task] of tasks) {
+
+        add_to_uplist(manifest);
+        if (DEBUG) { await sleep(COMPLETION_DELAY); }   // too darn fast :D
+        await task();  // create Promise and wait for it to finish
         if (DEBUG) {
-            await sleep(2000);  // too damn fast :D
+            await sleep(COMPLETION_DELAY);
+            progbar.attr('value', 0);
+            progbar.attr('max', 100);                   // looks better
         }
-        count++;
     }
+
+    // reset everything
+    setTimeout( () => {
+        progbar.attr('value', 0);
+        droptarget.show_ready();
+    }, COMPLETION_DELAY);
 }
 
 
@@ -244,32 +322,6 @@ function drag_end_handler(evt) {
     evt.preventDefault();
     console.debug('drag: end/exit/leave');
     droptarget.removeClass('hover');
-};
-
-
-const iconmap = {
-    'text/css': 'file-code-o',
-    'text/html': 'file-code-o',
-    'application/pdf': 'file-pdf-o',
-    'application/zip': 'file-zip-o',
-};
-function type_to_icon(mimetype) {
-    let icon = iconmap[mimetype];
-    if (!icon) {
-        const type = mimetype.split('/', 1)[0];
-        switch(type) {
-            case 'audio':
-            case 'image':
-            case 'text':
-            case 'video':
-                icon = `file-${type}-o`;  break;
-            case 'application':
-                icon = 'file-code-o';  break;
-            default:
-                icon = 'file-o';
-        };
-    };
-    return icon
 };
 
 
@@ -294,6 +346,7 @@ droptarget.on({
 
         // what did we get?
         const files = evt.originalEvent.dataTransfer.files;
+        console.log(`drop: ${files.length} file(s) dropped.`);
         if (files.length) {
 
             // check types first
@@ -309,22 +362,12 @@ droptarget.on({
 
             for (const file of files) {
                 total_size += file.size
-                // sort
-                if (file.size > FILE_SIZE_THRESHOLD) {
+                // sort files into 2 buckets depending on size
+                if (file.size > UPLOAD_FSIZE_THRESHOLD) {
                     large_files.push(file);
                 } else {
                     small_files.push(file);
                 }
-
-                //~ <li><progress id=f10 class=file value=25 max=100></progress>
-                    //~ <i class="fa fa-file-o"></i> Maracuja
-                //~ </li><progress id=f10 class=file value=0
-                                    //~ max=100></progress>
-                //~ const icon = type_to_icon(file.type);
-                uplist.append(`<li id=f00>
-                               <i class="stat fa fa-hourglass-half mr-2"></i>
-                               <i class="fa fa-${type_to_icon(file.type)} mr-1"></i>
-                               ${file.name}</li>`);
             }
 
             console.debug('upload: total file size:',
@@ -344,15 +387,15 @@ droptarget.on({
                 for (const file of small_files) {
                     fdata.append('files[]', file, file.name);
                 }
-                tasks.push( () =>  // defer w/ lambda
-                    upload_files_form(window.location.pathname, fdata,
-                                      small_files.length)
+                tasks.push( [small_files, () =>  // defer promise w/ lambda
+                             upload_files_form(window.location.pathname, fdata,
+                                               small_files.length)]
                 );
             }
-            // send each lg file separately
+            // send each large file separately
             for (const file of large_files) {
-                tasks.push( () =>  // defer w/ lambda
-                    upload_file(window.location.pathname, file)
+                tasks.push( [[file], () =>  // defer promise w/ lambda
+                             upload_file(window.location.pathname, file)]
                 );
             }
             exec_sequence(tasks);

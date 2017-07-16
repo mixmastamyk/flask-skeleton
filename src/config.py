@@ -8,6 +8,7 @@ from datetime import timedelta
 from .meta import fullname
 
 basedir = abspath(dirname(__file__))
+_1MB = 1000000
 
 
 # -- config values -----------------------------------------------------------
@@ -69,9 +70,11 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # uploads
 MAX_CONTENT_LENGTH_MB = 10  # MB (10³), not MiB (2¹⁰)
-MAX_CONTENT_LENGTH = MAX_CONTENT_LENGTH_MB * 1000000  # millions, flask setting
-UPLOAD_CHUNK_LENGTH = 8 * 1000000
+#~ MAX_CONTENT_LENGTH_MB = 32
+MAX_CONTENT_LENGTH = MAX_CONTENT_LENGTH_MB * _1MB  # flask setting
+UPLOAD_CHUNK_LENGTH = 8 * _1MB
 UPLOADED_FILES_DEST = '/tmp'
+UPLOAD_FSIZE_THRESHOLD = _1MB
 # var below needs to render in .gs, so leave as list:
 UPLOAD_UNSAVORY_EXTS = ['bat', 'cmd', 'exe', 'iso', 'php', 'vbs']
 

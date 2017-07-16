@@ -104,7 +104,7 @@ def upload_file():
                 log.error(msg)
                 flash(msg, 'error')
                 # might be a good idea to record these to user account
-                return redirect(request.url)
+                return redirect(request.url), 415  # unsupported media
 
             path = join(UPLOADED_FILES_DEST, filename)
             log.info('saving file as: %r', path)
@@ -134,7 +134,7 @@ def upload_file_put():
         log.error(msg)
         # might be a good idea to record these to user account
         return jsonify(status='failure', reason='Unsupported file type.',
-                       file=dict(name=filename))
+                       file=dict(name=filename)), 415  # media
 
     path = join(UPLOADED_FILES_DEST, filename)
     log.info('saving file as: %r', path)
@@ -148,7 +148,7 @@ def upload_file_put():
                 break
 
     return jsonify(status='success', path=path,
-                   file=dict(name=filename, size=con_len))
+                   file=dict(name=filename, size=con_len)), 201
 
 
 #~ @app.route('/upload_error', methods=('GET', 'POST'))
