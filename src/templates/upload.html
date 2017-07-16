@@ -45,16 +45,12 @@
         height: 1ex;
         width: 2em;
         border: 1px solid {{ hicolor }};
-        ZZdisplay: inline;
         margin-right: .6em;
     }
-    progress.file2 {
+    progress.file2 {  /* may need to be removed */
         height: .3em;
         width: 94%;
         border: 1px solid {{ hicolor }};
-        zzdisplay: inline;
-        zzmargin-right: .25em;
-        zzmargin-top: -1em;
     }
 
     /* chrome/webkit stuff */
@@ -64,21 +60,18 @@
     progress::-webkit-progress-value {
         background-color: {{ hicolor }};
     }
-    zzselect#multi {
-        width: 100%;
-        height: 100%;
-    }
 
     #uplist {
         border: .16rem dashed rgba(34, 34, 34, .1);
         border-left: 0;
-        zzfont-family: sans-serif;
         height: 12.2rem;
         overflow-y: auto;
         padding: .5em;
         padding-left: 1em;
     }
-
+    #uplist i.fa-check {
+        color: green;
+    }
 
 
 </style>
@@ -104,16 +97,7 @@
             </div>
             <div class="col-lg-4">
                 <strong>Files</strong>
-                <ul id=uplist class="list-unstyled">
-
-                    <li><progress id=f10 class=file value=25 max=100></progress>
-                        <i class="fa fa-file-o"></i> Maracuja
-                    </li>
-                    <li><progress id=f10 class=file value=50 max=100></progress>
-                        <i class="fa fa-file-o"></i> Maracuja
-                    </li>
-
-                </ul>
+                <ul id=uplist class="list-unstyled"></ul>
             </div>
         </div>
 
@@ -204,4 +188,11 @@ scroll_down();
                     <li>☑▏Mango</li>
                     <li><span style="color: {{ hicolor }};">█▏</span> Mango</li>
                     <li><span style="color: {{ hicolor }};">85%</span> Mango</li>
+
+                    <li><progress id=f10 class=file value=25 max=100></progress>
+                        <i class="fa fa-file-o"></i> Maracuja
+                    </li>
+                    <li><progress id=f10 class=file value=50 max=100></progress>
+                        <i class="fa fa-file-o"></i> Maracuja
+                    </li>
 -->

@@ -1,8 +1,6 @@
 //
 // javascript handling drag, drop, and file uploading goes here.
 //
-// TODO:  copy big binary files piece by piece w/o formData
-//
 'use strict';
 
 // Create a number formatter
@@ -42,7 +40,7 @@ function check_unsavory_files(evt, files) {
 
     for (const file of files) {
         const ext = file.name.split('.').pop();
-        file._ext = ext;  // save for later
+        file._ext = ext;  // save extension for later
         if (DEBUG) {
             console.debug(`check_files: ${file.name}, ${file.type}, size:
                ${loc.format(file.size)}  ext: ${ext}`.replace(/\s+/g, ' '));
@@ -55,13 +53,12 @@ function check_unsavory_files(evt, files) {
 
     // TODO: dialog building should be broken out to own function.
     if (unsavory.length) {
-        let filelist = ['<p>'];
+        const filelist = ['<p>'];
         for (const name of unsavory) {
             filelist.push(`<i class="fa fa-file-code-o ml-4"></i> ${name}<br>`);
         }
-        filelist.push('</p>');
 
-        console.warn('upload:', render_err_unsavory(''));  // render w/o list
+        console.warn('upload:', render_err_unsavory(''));  // w/o filelist
         show_err_dialog(render_err_unsavory(filelist.join('\n')));
     }
     return unsavory.length;
@@ -102,7 +99,7 @@ const uplist = $('#uplist');
 droptarget.set_icon = function (name) {
     this.html('<i class="fa fa-' + name + '"></i>');
 };
-droptarget.show_busy  = function () { droptarget.set_icon('send'); };
+droptarget.show_busy  = function () { this.set_icon('send'); };
 droptarget.show_error = function () { this.set_icon('times-circle'); };
 droptarget.show_ready = function () { this.set_icon('inbox'); };
 
@@ -127,13 +124,23 @@ function err_handler(evt) {
 
 
 function loadend_handler(evt) {     // upon completion or http error
-    const req = evt.target;  // this?
+    const req = evt.target;
 
     if (req.status == 200) {
         progbar.attr('max', 100);
         progbar.attr('value', 100);
         const msg = render_server_resp(req, 'status');
         console.log('upload end:', msg.replace('<br>', ''));
+
+        if (req._mode === 'form') {
+            $('#uplist i.stat')  // change icons on all for form
+                .addClass('fa-check')
+                .removeClass('fa-hourglass-half');
+        } else {
+            $('#uplist i.stat').last()  // change last icon
+                .addClass('fa-check')
+                .removeClass('fa-hourglass-half');
+        }
 
         // reset progress bar,
         setTimeout( () => {
@@ -162,6 +169,7 @@ function upload_files_form(location, formdata, numfiles) {
                        small files as form to ${location}…`.replace(/\s+/g, ' '));
         // prepare request, jq slim build no tiene .ajax
         const req = new XMLHttpRequest();
+        req._mode = 'form';  // signal to loadend handler how to handle icon
 
         // note: add the event listeners before calling open
         req.upload.onprogress = prog_handler;   // .upload.
@@ -188,6 +196,7 @@ function upload_file(location, file) {
                        to ${location}…`.replace(/\s+/g, ' '));
         // prepare request, jq slim build no tiene .ajax
         const req = new XMLHttpRequest();
+        req._mode = 'put';  // signal to loadend handler how to handle icon
 
         // add the event listeners before calling open
         req.upload.onprogress = prog_handler;   // note .upload.
@@ -211,13 +220,21 @@ function upload_file(location, file) {
 // ---------------------------------------------------------------------------
 // drag, drop handlers - could be moved
 
-// execute uploads in sequence
+// can js do that?  https://stackoverflow.com/a/39914235/450917
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// do async uploads in order :-P
 async function exec_sequence(tasks) {
     console.debug('execute task sequence…');
     let count = 0;
     for (const task of tasks) {
-        console.debug('starting task:', count);
+        console.debug('upload: starting task:', count);
         await task();  // create Promise and wait for it
+        if (DEBUG) {
+            await sleep(2000);  // too damn fast :D
+        }
         count++;
     }
 }
@@ -227,6 +244,32 @@ function drag_end_handler(evt) {
     evt.preventDefault();
     console.debug('drag: end/exit/leave');
     droptarget.removeClass('hover');
+};
+
+
+const iconmap = {
+    'text/css': 'file-code-o',
+    'text/html': 'file-code-o',
+    'application/pdf': 'file-pdf-o',
+    'application/zip': 'file-zip-o',
+};
+function type_to_icon(mimetype) {
+    let icon = iconmap[mimetype];
+    if (!icon) {
+        const type = mimetype.split('/', 1)[0];
+        switch(type) {
+            case 'audio':
+            case 'image':
+            case 'text':
+            case 'video':
+                icon = `file-${type}-o`;  break;
+            case 'application':
+                icon = 'file-code-o';  break;
+            default:
+                icon = 'file-o';
+        };
+    };
+    return icon
 };
 
 
@@ -272,14 +315,15 @@ droptarget.on({
                 } else {
                     small_files.push(file);
                 }
+
                 //~ <li><progress id=f10 class=file value=25 max=100></progress>
                     //~ <i class="fa fa-file-o"></i> Maracuja
                 //~ </li><progress id=f10 class=file value=0
                                     //~ max=100></progress>
+                //~ const icon = type_to_icon(file.type);
                 uplist.append(`<li id=f00>
-                               <i id=stat class="fa fa-hourglass-half mr-2"
-                                   ></i>
-                               <i class="fa fa-file-o"></i>
+                               <i class="stat fa fa-hourglass-half mr-2"></i>
+                               <i class="fa fa-${type_to_icon(file.type)} mr-1"></i>
                                ${file.name}</li>`);
             }
 
@@ -300,18 +344,18 @@ droptarget.on({
                 for (const file of small_files) {
                     fdata.append('files[]', file, file.name);
                 }
-                tasks.push( () =>  // defers
+                tasks.push( () =>  // defer w/ lambda
                     upload_files_form(window.location.pathname, fdata,
                                       small_files.length)
                 );
             }
             // send each lg file separately
             for (const file of large_files) {
-                tasks.push( () =>  // defers
+                tasks.push( () =>  // defer w/ lambda
                     upload_file(window.location.pathname, file)
                 );
             }
-            exec_sequence(tasks);  // do async uploads in order :-P
+            exec_sequence(tasks);
 
         } else {
             console.error('upload:', err_nofiles);
