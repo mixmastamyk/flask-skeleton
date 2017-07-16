@@ -71,22 +71,20 @@ def status(code):
     title = http_status_text.get(code, 'Unknown')
     desc  = http_status_description.get(code, 'Unknown')
     category = utils.get_status_category(code)
-    #~ icon = utils.get_status_icon(code)
 
     # if this was an ajax request, return json instead of html
     if request.accept_mimetypes.best == 'application/json':
         log.debug('client prefers json, skipping page render.')
-        return jsonify(status='success',
-            )
-
-
-    return render('status.html', category=category, code=code,
-                                 title=title, desc=desc), code
+        return jsonify(status=title, category=category, code=code,
+                       desc=desc)
+    else:
+        return render('status.html', category=category, code=code,
+                                     title=title, desc=desc), code
 
 
 @app.route('/profile', methods=('GET', 'POST'))
 def show_profile():
-    # get user and form
+    # How to query models
     #~ user = Users.query.filter_by(id=uid).first_or_404()
     user = current_user
     form = UserForm(obj=user)
