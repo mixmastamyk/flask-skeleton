@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} {{ title }}{% endblock %}
+
+{% block body %}
+    <h1>
+        <i class="fa{%- if category == 'informational' %}
+                        fa-info-circle text-info
+                    {% elif category == 'success' %}
+                        fa-check-circle text-success
+                    {% elif category == 'redirection' %}
+                        fa-external-link-square text-warning bg-inverse rounded
+                    {% elif category == 'client error' %}
+                        fa-times-circle text-danger
+                    {% elif category == 'server error' %}
+                        fa-times-circle text-danger
+                    {% elif category == 'invalid' %}
+                        fa-question-circle text-muted
+                    {% endif %}"></i>
+        {{ title }}
+    </h1>
+
+    <p>The server returned the following information:</p>
+
+    <p>
+        <table class="table table-responsive">
+            <tbody>
+                <tr>
+                    <th>HTTP Status:</th>
+                    <td><tt>{{ code }} {{ title }}</tt></td>
+                </tr>
+                <tr>
+                    <th>Category:</th>
+                    <td>{{ category.title() }}</td>
+                </tr>
+                <tr>
+                    <th>Details:</th>
+                    <td>{{ desc }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </p>
+
+    <p>&nbsp;</p>
+
+    <h2>Links</h2>
+
+    <ul class="list-unstyled pl-3">
+        <li><i class="fa fa-home pr-1"></i> <a href="/">Home</a></li>
+        <li><i class="fa fa-user-circle pr-1"></i> <a href="/profile">User Profile Page</a></li>
+        <li><i class="fa fa-cloud-upload pr-1"></i> <a href="/upload">Upload Files</a></li>
+        <li><i class="fa fa-list pr-1"></i> <a href="/routes">Configured Routes</a></li>
+        <li><i class="fa fa-gear pr-1"></i> <a href="/admin/">Admin</a></li>
+    </ul>
+{% endblock %}

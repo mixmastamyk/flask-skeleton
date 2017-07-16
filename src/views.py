@@ -2,6 +2,8 @@
     Controllers/views for the web interface are defined here.
 '''
 from os.path import join, splitext
+from http_status import name as http_status_text
+from http_status import description as http_status_description
 
 from flask import (
     #~ abort,
@@ -23,6 +25,7 @@ from .forms import UserForm
 from .logcfg import log
 from .main import app, db
 #~ from .database import Users
+from . import utils
 
 
 SKIP_LOGIN =  ('static', '_default_auth_request_handler')
@@ -59,6 +62,26 @@ def routes():
     rules.sort(key=lambda r: r.rule)
 
     return render('routes.html', title='Routes configured', routes=rules)
+
+
+@app.route('/status/<int:code>', methods=('DELETE', 'GET', 'HEAD', 'OPTIONS',
+                                         'POST', 'PUT'))
+def status(code):
+    ''' For client debugging purposes. '''
+    title = http_status_text.get(code, 'Unknown')
+    desc  = http_status_description.get(code, 'Unknown')
+    category = utils.get_status_category(code)
+    #~ icon = utils.get_status_icon(code)
+
+    # if this was an ajax request, return json instead of html
+    if request.accept_mimetypes.best == 'application/json':
+        log.debug('client prefers json, skipping page render.')
+        return jsonify(status='success',
+            )
+
+
+    return render('status.html', category=category, code=code,
+                                 title=title, desc=desc), code
 
 
 @app.route('/profile', methods=('GET', 'POST'))
@@ -151,18 +174,13 @@ def upload_file_put():
                    file=dict(name=filename, size=con_len)), 201
 
 
-#~ @app.route('/upload_error', methods=('GET', 'POST'))
-#~ def upload_file_error():
-    #~ # return 'Bad Request!', 400
-    #~ return 'Server Kablooey', 500
-
-
 if app_debug:
     # Add more noticeable error logging.
     @app.after_request
     def response(response):
         status_code = response.status_code
 
+        # TODO: should use utils status function
         if 200 <= status_code < 400:    # if app_debug:
             log.debug(response.status)
         elif 400 <= status_code < 500:  # client error

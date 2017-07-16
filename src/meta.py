@@ -41,6 +41,7 @@ pkg_reqs        = (    # for setup.py
     'flask-security',
     'flask-sqlalchemy',
     'flask-wtf',
+    'http-status',
     'pytz',
     'sqlalchemy-utils',
     'wtforms-alchemy',
