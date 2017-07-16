@@ -40,7 +40,7 @@ function check_unsavory_files(evt, files) {
     }
     const unsavory = [];                    // props still mutable
 
-    for (let file of files) {
+    for (const file of files) {
         const ext = file.name.split('.').pop();
         file._ext = ext;  // save for later
         if (DEBUG) {
@@ -56,7 +56,7 @@ function check_unsavory_files(evt, files) {
     // TODO: dialog building should be broken out to own function.
     if (unsavory.length) {
         let filelist = ['<p>'];
-        for (let name of unsavory) {
+        for (const name of unsavory) {
             filelist.push(`<i class="fa fa-file-code-o ml-4"></i> ${name}<br>`);
         }
         filelist.push('</p>');
@@ -261,10 +261,10 @@ droptarget.on({
             }
 
             // check sizes second
-            let small_files = [], large_files = [], tasks = [],
-                total_size = 0;
+            const small_files = [], large_files = [], tasks = [];
+            let total_size = 0;
 
-            for (let file of files) {
+            for (const file of files) {
                 total_size += file.size
                 // sort
                 if (file.size > FILE_SIZE_THRESHOLD) {
@@ -297,7 +297,7 @@ droptarget.on({
             droptarget.show_busy();
             if (small_files.length) {
                 const fdata = new FormData();
-                for (let file of small_files) {
+                for (const file of small_files) {
                     fdata.append('files[]', file, file.name);
                 }
                 tasks.push( () =>  // defers
@@ -306,7 +306,7 @@ droptarget.on({
                 );
             }
             // send each lg file separately
-            for (let file of large_files) {
+            for (const file of large_files) {
                 tasks.push( () =>  // defers
                     upload_file(window.location.pathname, file)
                 );
