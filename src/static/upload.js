@@ -38,6 +38,7 @@ const uplist = $('#uplist');
 const iconmap = {
     'text/css': 'file-code-o',
     'text/html': 'file-code-o',
+    'text/xml': 'file-code-o',
     'application/pdf': 'file-pdf-o',
     'application/zip': 'file-zip-o',
 };
@@ -52,7 +53,7 @@ droptarget.show_ready = function () { this.set_icon('inbox'); };
 
 
 function set_icon(icons, name) {
-    icons.addClass('fa-' + name).removeClass('fa-hourglass-half');
+    icons.addClass('fa-' + name).removeClass('fa-spin fa-spinner');
 }
 
 function show_results(success) {                        // form instructions
@@ -86,7 +87,7 @@ function add_to_uplist(manifest) {
             <li id=f00>
                 <div class="d-flex">
                     <div class="icons">
-                        <i class="stat fa fa-hourglass-half pr-1"></i>
+                        <i class="stat fa fa-spinner fa-spin pr-1"></i>
                         <i class="fa fa-${type_to_icon(file.type)}"></i>
                     </div>
                     <div class="pl-1">${file.name}</div>
@@ -355,6 +356,7 @@ droptarget.on({
                 console.error('upload submit: unsupported files, skipped.');
                 return
             }
+            $('#quantity').html(`(${files.length} dropped)`);
 
             // check sizes second
             const small_files = [], large_files = [], tasks = [];

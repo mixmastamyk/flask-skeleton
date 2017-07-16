@@ -61,17 +61,24 @@
         border-left: 0;
         height: 16.2rem;   /* #droptarget..height + progress#main..height */
         overflow-y: auto;
-        padding: .5em;
-        padding-left: 1em;
+        padding: .2em;
+        zzpadding-left: 1em;
+    }
+    #uplist li {
+        padding: .1em;
+        padding-left: .5em;
+    }
+    #uplist li:nth-of-type(odd) {
+        background: #dcd9d9;
     }
     #uplist i.fa-check { color: green; }
     #uplist i.fa-times { color: darkred; }
-    #uplist i.fa-hourglass-half { color: {{ hicolor }}; }
+    #uplist i.fa-spinner { color: {{ hicolor }}; }
     #uplist div.icons {
         flex-basis: content;
         white-space: nowrap;
     }
-
+}
 
 </style>
 {% endblock %}
@@ -95,7 +102,7 @@
                 <progress id=main value=0 max=100></progress>
             </div>
             <div class="col-lg-4">
-                <strong>Files</strong>
+                <strong>Files <span id=quantity></span></strong>
                 <ul id=uplist class="list-unstyled"></ul>
             </div>
         </div>
