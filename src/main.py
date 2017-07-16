@@ -71,7 +71,7 @@ app.jinja_options = dict(**app.jinja_options.copy(),
     lstrip_blocks=True,
 )
 
-admin, utils, views  # noop - shut up pyflakes
+admin, utils, views, errors  # no-op - shut up pyflakes
 atexit.register(on_shutdown)  # still needs a signal handler
 log.info('By your command…')
 

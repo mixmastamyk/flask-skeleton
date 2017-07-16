@@ -98,6 +98,15 @@ const progbar = $('progress#main');
 const uplist = $('#uplist');
 
 
+// rm a bit of implementation detail
+droptarget.set_icon = function (name) {
+    this.html('<i class="fa fa-' + name + '"></i>');
+};
+droptarget.show_busy  = function () { droptarget.set_icon('send'); };
+droptarget.show_error = function () { this.set_icon('times-circle'); };
+droptarget.show_ready = function () { this.set_icon('inbox'); };
+
+
 function prog_handler(evt) {
     if (evt.lengthComputable) {
         console.debug(`upload progress: ${evt.loaded}/${evt.total}`);
@@ -111,8 +120,8 @@ function prog_handler(evt) {
 
 function err_handler(evt) {
     // err handler only fires on low-level network errors, not most http
-    droptarget.html('<i class="fa fa-times-circle"></i>');
     console.error('upload: ', err_network);
+    droptarget.show_error();
     show_err_dialog(err_network);
 };
 
@@ -129,7 +138,7 @@ function loadend_handler(evt) {     // upon completion or http error
         // reset progress bar,
         setTimeout( () => {
             progbar.attr('value', 0);
-            droptarget.html('<i class="fa fa-inbox"></i>');
+            droptarget.set_icon('inbox');
         }, COMPLETION_DELAY);
 
     } else if (req.status == 0) {   // net error occurred, see err_handler.
@@ -137,7 +146,7 @@ function loadend_handler(evt) {     // upon completion or http error
     } else {                        // http error occurred
         progbar.attr('max', 100);
         progbar.attr('value', 0);
-        droptarget.html('<i class="fa fa-times-circle"></i>');
+        droptarget.show_error();
         const msg = render_server_resp(req, 'error');
         console.error('upload end:', msg);
         show_err_dialog(msg);
@@ -237,18 +246,17 @@ droptarget.on({
     drop: (evt) => {
         evt.preventDefault();
         console.log('drop: occurred');
-        droptarget.removeClass('hover');
         uplist.empty();
-        droptarget.html('<i class="fa fa-send"></i>');
+        droptarget.removeClass('hover');
 
         // what did we get?
         const files = evt.originalEvent.dataTransfer.files;
         if (files.length) {
 
+            // check types first
             if (check_unsavory_files(null, files)) {
                 // this is the second error msg delivered, needs refr.
                 console.error('upload submit: unsupported files, skipped.');
-                droptarget.html('<i class="fa fa-inbox"></i>');
                 return
             }
 
@@ -280,11 +288,13 @@ droptarget.on({
             if (total_size > MAX_CONTENT_LENGTH) {
                 const msg = render_err_maxsize(loc, total_size);
                 console.error('upload:', msg);
-                show_err_dialog(msg);
                 uplist.empty();
+                show_err_dialog(msg);
                 return
             }
 
+            // prepare and get started
+            droptarget.show_busy();
             if (small_files.length) {
                 const fdata = new FormData();
                 for (let file of small_files) {

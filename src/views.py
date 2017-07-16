@@ -4,8 +4,9 @@
 from os.path import join, splitext
 
 from flask import (
+    #~ abort,
     flash,      # flash categories: success, (blank) info, warning, error
-    g,
+    #~ g,
     jsonify,
     redirect,
     render_template as render,
@@ -21,7 +22,7 @@ from .config import (UPLOAD_CHUNK_LENGTH, UPLOAD_UNSAVORY_EXTS,
 from .forms import UserForm
 from .logcfg import log
 from .main import app, db
-from .database import Users
+#~ from .database import Users
 
 
 SKIP_LOGIN =  ('static', '_default_auth_request_handler')
@@ -81,14 +82,13 @@ def show_profile():
             db.session.rollback()
             flash('Database: %s' % err.orig, 'error')
 
-        return redirect(url_for('show_user', uid=uid))
+        return redirect(url_for('show_profile'))
 
     return render('profile.html', title='Profile Page', form=form)
 
 
 @app.route('/upload', methods=('GET', 'POST'))
 def upload_file():
-
     if request.method =='POST':
         files = request.files.getlist('files[]')
         for f in files:
@@ -121,6 +121,7 @@ def upload_file():
     return render('upload.html', title='Uploads', debug=int(app_debug))
 
 
+# this doesn't seem to respect max size, like post does
 @app.route('/upload', methods=('PUT',))
 def upload_file_put():
 
