@@ -2,7 +2,6 @@
 // javascript handling drag, drop, and file uploading goes here.
 //
 // TODO: make droptarget icon not interfere with drag
-// TODO: Make another drop impossible during upload
 // TODO: check unsavory to have one argument with type checking
 // TODO: flatten drop action
 'use strict';
@@ -226,7 +225,6 @@ $('#upload_form').submit( (evt) => {        // on submit button
 // ajax upload functions
 
 const COMPLETION_DELAY = 2000;  // ms, for perception of work with tiny files.
-//~ let transfer_active = false;    // unfortunate global to ensure 1 op at a time
 
 
 function prog_handler(evt) {
@@ -337,9 +335,10 @@ function upload_file(location, file) {
 // Do async uploads in an orderly sequence :-P
 async function execute_task_sequence(tasks) {
     console.debug('execute task sequence…');
-    for (let [manifest, task] of tasks) {  // TODO let const
+    for (const [manifest, task] of tasks) {  // TODO let const
 
         add_to_uplist(manifest);
+        droptarget.show_busy();  // do every time, err may need to be reset
         if (DEBUG) { await sleep(COMPLETION_DELAY); }   // too darn fast :D
         await task();  // create Promise and wait for it to finish
         if (DEBUG) {
@@ -360,13 +359,6 @@ async function execute_task_sequence(tasks) {
 // ---------------------------------------------------------------------------
 // drag, drop handlers
 
-function drag_end_handler(evt) {
-    evt.preventDefault();
-    console.debug('drag: end/exit/leave');
-    droptarget.removeClass('hover');
-};
-
-
 // prevent dropping (on other parts of page) breaking everything
 $(document).on({
     dragover: (evt) => {
@@ -380,6 +372,13 @@ $(document).on({
 });
 
 
+function drag_end_handler(evt) {
+    evt.preventDefault();
+    console.debug('drag: end/exit/leave');
+    droptarget.removeClass('hover');
+};
+
+
 // configure the drop target
 droptarget.on({
     dragend: drag_end_handler,
@@ -388,7 +387,9 @@ droptarget.on({
     dragenter: (evt) => {
         evt.preventDefault();
         console.debug('drag: enter');
-        if (!droptarget.is_busy()) {
+        if (droptarget.is_busy()) {
+            droptarget.show_error();
+        } else {
             droptarget.addClass('hover');
         }
     },
@@ -450,8 +451,6 @@ droptarget.on({
 
             // prepare and get started
             quantity.html(`(${files.length} dropped)`);
-            droptarget.show_busy();
-            //~ transfer_active = true;
             if (small_files.length) {
                 const fdata = new FormData();
                 for (const file of small_files) {
