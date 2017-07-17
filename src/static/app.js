@@ -11,13 +11,13 @@ function show_msg_dialog(icon, title, body) {
 }
 
 
-function show_warn_dialog(body) {
-    show_msg_dialog('exclamation-triangle', 'Warning:', body);
+function show_err_dialog(body) {
+    show_msg_dialog('exclamation-circle', 'Error:', body);
 }
 
 
-function show_err_dialog(body) {
-    show_msg_dialog('exclamation-circle', 'Error:', body);
+function show_warn_dialog(body) {
+    show_msg_dialog('exclamation-triangle', 'Warning:', body);
 }
 
 

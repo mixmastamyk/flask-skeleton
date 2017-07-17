@@ -1,9 +1,10 @@
 //
 // javascript handling drag, drop, and file uploading goes here.
 //
-// TODO: make droptarget icon not interfere in drag
+// TODO: make droptarget icon not interfere with drag
 // TODO: Make another drop impossible during upload
 // TODO: check unsavory to have one argument with type checking
+// TODO: flatten drop action
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -27,14 +28,20 @@ const render_server_resp = (req, type) =>
      <p>${req.status} ${req.statusText}`.replace(/\s+/g, ' ');
 const err_network =
     'A low-level network error occurred, or the connection was reset.';
-const err_nofiles = 'No files found in drop action.  Please try again.';
+const msg_err_nofiles = 'No files found in drop action.  Please try again.';
+const msg_err_missed = `Sorry, you missed the drop box, try again.
+    Look for the box to the top left labeled "Drop Box."
+    <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
+const msg_err_cowboy = `Woah there, cowboy! Hold yer horses.
+    <p>Can't ya see we're already a bit busy here?`.replace(/\s+/g, ' ');
 
 const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
 
 
 // ---------------------------------------------------------------------------
-// view implementation details
+// view and implementation details
 
+const body = $('body');
 const droptarget = $('#droptarget');
 const progbar = $('progress#main');
 const quantity = $('#quantity');
@@ -66,6 +73,28 @@ function add_to_uplist(manifest) {
 };
 
 
+// functions to manage state of the drop target/operation
+droptarget.set_icon = function (name) {
+    this.html(`<i class="fa fa-${name}"></i>`);
+};
+droptarget.is_busy = function () {
+    return this._transfer_active || false;  // possibly undefined
+};
+droptarget.show_error = function () {
+    this.set_icon('times-circle');
+};
+droptarget.show_ready = function () {
+    body.css('cursor', 'default');
+    this.set_icon('inbox');
+    this._transfer_active = false;
+};
+droptarget.show_busy  = function () {
+    body.css('cursor', 'wait');
+    this.set_icon('send');
+    this._transfer_active = true;
+};
+
+
 // convert a file's mime-type into a "fa" icon
 function icon_from_type(mimetype) {
     let icon = icon_map[mimetype];                       // first attempt
@@ -87,13 +116,6 @@ function icon_from_type(mimetype) {
     };
     return icon
 };
-// set icons for the drop target
-droptarget.set_icon = function (name) {
-    this.html(`<i class="fa fa-${name}"></i>`);
-};
-droptarget.show_busy  = function () { this.set_icon('send'); };
-droptarget.show_error = function () { this.set_icon('times-circle'); };
-droptarget.show_ready = function () { this.set_icon('inbox'); };
 
 
 // set icons for the upload list items
@@ -204,6 +226,7 @@ $('#upload_form').submit( (evt) => {        // on submit button
 // ajax upload functions
 
 const COMPLETION_DELAY = 2000;  // ms, for perception of work with tiny files.
+//~ let transfer_active = false;    // unfortunate global to ensure 1 op at a time
 
 
 function prog_handler(evt) {
@@ -344,18 +367,15 @@ function drag_end_handler(evt) {
 };
 
 
-// prevent droppage on other parts of page breaking everything
+// prevent dropping (on other parts of page) breaking everything
 $(document).on({
     dragover: (evt) => {
         evt.preventDefault();  // yes, this is needed.
     },
     drop: (evt) => {
         evt.preventDefault();
-        const msg = `Sorry, you missed the drop box, try again.
-                     Look for the box to the top left labeled "Drop Box."
-                     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
         console.warn('drop: missed target.');
-        show_warn_dialog(msg);
+        show_warn_dialog(msg_err_missed);
     }
 });
 
@@ -368,32 +388,43 @@ droptarget.on({
     dragenter: (evt) => {
         evt.preventDefault();
         console.debug('drag: enter');
-        droptarget.addClass('hover');
+        if (!droptarget.is_busy()) {
+            droptarget.addClass('hover');
+        }
     },
     dragover: (evt) => {
         evt.preventDefault();  // yes, this is needed.
     },
     drop: (evt) => {
+        // prepare for operation
         evt.preventDefault();
-        evt.stopPropagation();  // prevents interference from document handler
+        evt.stopPropagation();  // prevent interference from doc handler above
         console.log('drop: occurred');
+
+        // we're not already busy are we?
+        if (droptarget.is_busy()) {
+            console.error(msg_err_cowboy);
+            show_err_dialog(msg_err_cowboy);
+            return;
+        }
+        // no…
+        droptarget.removeClass('hover');
         uplist.empty();
         quantity.empty();
-        droptarget.removeClass('hover');
 
         // what did we get?
         const files = evt.originalEvent.dataTransfer.files;
         console.log(`drop: ${files.length} file(s) dropped.`);
-        if (files.length) {
+        if (files.length) {  // check for files first
 
-            // check types first
+            // check types second
             const unsavory = check_unsavory_files(null, files);
             if (unsavory.length) {
                 show_unsavory_dialog(unsavory);
                 return
             }
 
-            // check sizes second
+            // check sizes third
             const small_files = [], large_files = [], tasks = [];
             let total_size = 0;
 
@@ -420,6 +451,7 @@ droptarget.on({
             // prepare and get started
             quantity.html(`(${files.length} dropped)`);
             droptarget.show_busy();
+            //~ transfer_active = true;
             if (small_files.length) {
                 const fdata = new FormData();
                 for (const file of small_files) {
@@ -438,8 +470,8 @@ droptarget.on({
             execute_task_sequence(tasks);
 
         } else {
-            console.error('upload:', err_nofiles);
-            show_err_dialog(err_nofiles);
+            console.error('upload:', msg_err_nofiles);
+            show_err_dialog(msg_err_nofiles);
         }
     },
 });

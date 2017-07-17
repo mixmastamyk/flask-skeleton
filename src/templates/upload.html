@@ -86,7 +86,7 @@
 
 
 {% block body %}
-    <h1><i class="fa fa-cloud-upload"></i> {{ title }}</h1>
+    <h1><i class="fa fa-cloud-upload text-muted"></i> {{ title }}</h1>
     <p>
         Media and data files (max: {{ config.MAX_CONTENT_LENGTH_MB }}MB) may be
         uploaded by dropping them over the target below:
@@ -130,12 +130,10 @@
             </button>
         </p>
     </form>
-
-
 {% endblock %}
 
 
-{% block postscript %}
+{% block postscript %}{# set constants and load upload.js #}
 <script>
 'use strict';
 
