@@ -2,7 +2,8 @@
 // javascript handling drag, drop, and file uploading goes here.
 //
 // TODO: make droptarget icon not interfere with drag
-// TODO: check unsavory to have one argument with type checking
+// TODO: handle ESC key for abort.
+// TODO: max num of files
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -30,8 +31,8 @@ const msg_err_nofiles = 'No files found in drop action.  Please try again.';
 const msg_err_missed = `Sorry, you missed the drop box, try again.
     Look for the box to the top left labeled "Drop Box."
     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
-const msg_err_cowboy = `Woah there, cowboy! 🤠  Hold yer horses.
-    <p>Can't ya see we're already a bit busy here?`.replace(/\s+/g, ' ');
+const msg_err_cowboy = `Woah there, cowboy! Hold yer horses.
+    <p>Can't ya see we're already a bit busy here? 🤠`.replace(/\s+/g, ' ');
 
 const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
 
@@ -170,9 +171,10 @@ function scroll_it_down(element) {  // watch out!  https://youtu.be/RZUq6N7Gx1c
 
 
 // prevent known-skeezy file types from entering our upload list
-function check_unsavory_files(evt, files) {
-    if (typeof(files) === 'undefined') {    // handle event or a direct call.
-        files = evt.target.files;           // FileList object
+function check_unsavory_files(files) {
+    if (files.originalEvent instanceof Event) {     // handle FileList or event
+        console.debug('check_files: files is an event, finding files.');
+        files = files.target.files;
     }
     const unsavory = [];
 
@@ -212,7 +214,7 @@ $('#upload_form').submit( (evt) => {        // on submit button
         return
     }
 
-    const unsavory = check_unsavory_files(null, files);
+    const unsavory = check_unsavory_files(files);
     if (unsavory.length) {
         show_unsavory_dialog(unsavory, 'error');
         evt.preventDefault();
@@ -421,7 +423,7 @@ droptarget.on({
         }
 
         // good, next check types
-        const unsavory = check_unsavory_files(null, files);
+        const unsavory = check_unsavory_files(files);
         if (unsavory.length) {
             show_unsavory_dialog(unsavory);
             return;
