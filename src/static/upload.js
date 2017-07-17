@@ -1,6 +1,10 @@
 //
 // javascript handling drag, drop, and file uploading goes here.
 //
+// TODO: make droptarget icon not interfere in drag
+// TODO: refactor dialog from check_files fn
+// TODO: Make drop impossible during upload
+
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -34,16 +38,18 @@ const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
 
 const droptarget = $('#droptarget');
 const progbar = $('progress#main');
+const quantity = $('#quantity');
 const uplist = $('#uplist');
-const iconmap = {
+const icon_map = {
+    'application/pdf': 'file-pdf-o',
+    'application/zip': 'file-zip-o',
     'text/css': 'file-code-o',
     'text/html': 'file-code-o',
     'text/xml': 'file-code-o',
-    'application/pdf': 'file-pdf-o',
-    'application/zip': 'file-zip-o',
 };
 
 
+// set icons for the drop target
 droptarget.set_icon = function (name) {
     this.html(`<i class="fa fa-${name}"></i>`);
 };
@@ -52,35 +58,41 @@ droptarget.show_error = function () { this.set_icon('times-circle'); };
 droptarget.show_ready = function () { this.set_icon('inbox'); };
 
 
-function set_icon(icons, name) {
+// set icons for the upload list items
+function set_uplist_icons(icons, name) {
     icons.addClass('fa-' + name).removeClass('fa-spin fa-spinner');
 }
 
-function show_results(success) {                        // form instructions
-    const icons = $('#uplist i.stat');                  // change all icons
-    if (success) {
-        set_icon(icons, 'check');
-    } else {
-        set_icon(icons, 'times');
-    };
-}
 
-function show_single_result(success) {                  // put instructions
-    const icon = $('#uplist li:last-child i.stat');     // change one icon
+// form submission - change all existing icons to success or failure
+function show_results(success) {
+    const icons = $('#uplist i.stat');
     if (success) {
-        set_icon(icon, 'check');
+        set_uplist_icons(icons, 'check');
     } else {
-        set_icon(icon, 'times');
+        set_uplist_icons(icons, 'times');
     };
 }
 
 
+// put instructions - change the last icon only
+function show_single_result(success) {
+    const icon = $('#uplist li:last-child i.stat');     // note last-child
+    if (success) {
+        set_uplist_icons(icon, 'check');
+    } else {
+        set_uplist_icons(icon, 'times');
+    };
+}
+
+
+// scroll uplist down to the last item
 function scroll_it_down(element) {  // watch out!  https://youtu.be/RZUq6N7Gx1c
     element.scrollTop(element.prop('scrollHeight'));
 }
 
 
-// add an upload to the file list
+// add an upload item to the list for each file in the manifest
 function add_to_uplist(manifest) {
     for (const file of manifest) {
         uplist.append(`
@@ -88,7 +100,7 @@ function add_to_uplist(manifest) {
                 <div class="d-flex">
                     <div class="icons">
                         <i class="stat fa fa-spinner fa-spin pr-1"></i>
-                        <i class="fa fa-${type_to_icon(file.type)}"></i>
+                        <i class="fa fa-${icon_from_type(file.type)}"></i>
                     </div>
                     <div class="pl-1">${file.name}</div>
                 </div>
@@ -99,19 +111,21 @@ function add_to_uplist(manifest) {
 };
 
 
-// convert a type into a fa icon
-function type_to_icon(mimetype) {
-    let icon = iconmap[mimetype];
+// convert a file's mime-type into a "fa" icon
+function icon_from_type(mimetype) {
+    let icon = icon_map[mimetype];                       // first attempt
     if (!icon) {
-        const type = mimetype.split('/', 1)[0];
+        const type = mimetype.split('/', 1)[0];         //  "type/subtype"
         switch(type) {
             case 'audio':
             case 'image':
             case 'text':
             case 'video':
-                icon = `file-${type}-o`;  break;
+                icon = `file-${type}-o`;
+                break;
             case 'application':
-                icon = 'file-code-o';  break;
+                icon = 'file-code-o';
+                break;
             default:
                 icon = 'file-o';
         };
@@ -125,7 +139,7 @@ function check_unsavory_files(evt, files) {
     if (typeof(files) === 'undefined') {    // handle event or a direct call.
         files = evt.target.files;           // FileList object
     }
-    const unsavory = [];                    // props still mutable
+    const unsavory = [];
 
     for (const file of files) {
         const ext = file.name.split('.').pop();
@@ -164,7 +178,7 @@ $('#upload_form').submit( (evt) => {        // on submit button
     if (files.length === 0) {
         const msg = render_err_zerofiles();
         console.error('upload on_submit:', msg);
-        show_msg_dialog('exclamation-circle', 'Error:', msg);
+        show_err_dialog(msg);
         evt.preventDefault();
 
     } else if (check_unsavory_files(null, files)) {
@@ -175,7 +189,7 @@ $('#upload_form').submit( (evt) => {        // on submit button
 
 
 // ---------------------------------------------------------------------------
-// ajax upload
+// ajax upload functions
 
 const COMPLETION_DELAY = 2000;  // ms, for perception of work with tiny files.
 
@@ -210,8 +224,6 @@ function loadend_handler(evt) {     // upon completion or http error
     const req = evt.target;
 
     if (req.status >= 200 && req.status < 300) {
-        //~ progbar.attr('max', 100);   // progress does this
-        //~ progbar.attr('value', 100);
         const msg = render_server_resp(req, 'status');
         console.log('upload end:', rmtags(msg));
         req._show_results(true);
@@ -234,8 +246,8 @@ function loadend_handler(evt) {     // upon completion or http error
 function upload_files_form(location, formdata, numfiles) {
     return new Promise( (resolve, reject) => {
 
-        console.debug(`upload form: sending ${numfiles}
-                       small files as form to ${location}…`.replace(/\s+/g, ' '));
+        console.debug(`upload form: sending ${numfiles} small files as form
+                       to ${location}…`.replace(/\s+/g, ' '));
         // prepare request, jq slim build no tiene .ajax
         const req = new XMLHttpRequest();
 
@@ -253,7 +265,6 @@ function upload_files_form(location, formdata, numfiles) {
         // signal back-end to return json instead of full page:
         req.setRequestHeader('Accept', 'application/json');
         req.send(formdata);
-
     });
 };
 
@@ -288,18 +299,10 @@ function upload_file(location, file) {
 };
 
 
-// ---------------------------------------------------------------------------
-// drag, drop handlers - could be moved
-
-// can js do that?  https://stackoverflow.com/a/39914235/450917
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// do async uploads in order :-P
-async function exec_sequence(tasks) {
+// Do async uploads in an orderly sequence :-P
+async function execute_task_sequence(tasks) {
     console.debug('execute task sequence…');
-    for (let [manifest, task] of tasks) {
+    for (let [manifest, task] of tasks) {  // TODO let const
 
         add_to_uplist(manifest);
         if (DEBUG) { await sleep(COMPLETION_DELAY); }   // too darn fast :D
@@ -311,13 +314,16 @@ async function exec_sequence(tasks) {
         }
     }
 
-    // reset everything
+    // reset after a delay, to give perception of work
     setTimeout( () => {
         progbar.attr('value', 0);
         droptarget.show_ready();
     }, COMPLETION_DELAY);
 }
 
+
+// ---------------------------------------------------------------------------
+// drag, drop handlers
 
 function drag_end_handler(evt) {
     evt.preventDefault();
@@ -326,6 +332,21 @@ function drag_end_handler(evt) {
 };
 
 
+// prevent droppage on other parts of page breaking everything
+$(document).on({
+    dragover: (evt) => {
+        evt.preventDefault();  // yes, this is needed.
+    },
+    drop: (evt) => {
+        evt.preventDefault();
+        const msg = ('Sorry, you missed the drop box, try again. ' +
+                     '<i class="fa fa-smile-o"></i>');
+        show_warn_dialog(msg);
+    }
+});
+
+
+// configure the drop target
 droptarget.on({
     dragend: drag_end_handler,
     dragexit: drag_end_handler,
@@ -341,8 +362,10 @@ droptarget.on({
 
     drop: (evt) => {
         evt.preventDefault();
+        evt.stopPropagation();  // prevents interference from document handler
         console.log('drop: occurred');
         uplist.empty();
+        quantity.empty();
         droptarget.removeClass('hover');
 
         // what did we get?
@@ -356,7 +379,7 @@ droptarget.on({
                 console.error('upload submit: unsupported files, skipped.');
                 return
             }
-            $('#quantity').html(`(${files.length} dropped)`);
+            quantity.html(`(${files.length} dropped)`);
 
             // check sizes second
             const small_files = [], large_files = [], tasks = [];
@@ -391,16 +414,15 @@ droptarget.on({
                 }
                 tasks.push( [small_files, () =>  // defer promise w/ lambda
                              upload_files_form(window.location.pathname, fdata,
-                                               small_files.length)]
-                );
+                                               small_files.length)] );
             }
             // send each large file separately
             for (const file of large_files) {
-                tasks.push( [[file], () =>  // defer promise w/ lambda
-                             upload_file(window.location.pathname, file)]
-                );
+                tasks.push( [[file], () =>  // defer task promise w/ lambda
+                             upload_file(window.location.pathname, file)] );
             }
-            exec_sequence(tasks);
+            // get busy
+            execute_task_sequence(tasks);
 
         } else {
             console.error('upload:', err_nofiles);

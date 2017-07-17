@@ -10,12 +10,19 @@ function show_msg_dialog(icon, title, body) {
     $('#msg_dialog').modal('show');
 }
 
+
 function show_warn_dialog(body) {
     show_msg_dialog('exclamation-triangle', 'Warning:', body);
 }
+
 
 function show_err_dialog(body) {
     show_msg_dialog('exclamation-circle', 'Error:', body);
 }
 
+
+// can js do that?  https://stackoverflow.com/a/39914235/450917
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
