@@ -2,9 +2,8 @@
 // javascript handling drag, drop, and file uploading goes here.
 //
 // TODO: make droptarget icon not interfere in drag
-// TODO: refactor dialog from check_files fn
-// TODO: Make drop impossible during upload
-
+// TODO: Make another drop impossible during upload
+// TODO: check unsavory to have one argument with type checking
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -49,6 +48,45 @@ const icon_map = {
 };
 
 
+// add an upload item to the list for each file in the manifest
+function add_to_uplist(manifest) {
+    for (const file of manifest) {
+        uplist.append(`
+            <li id=f00>
+                <div class="d-flex">
+                    <div class="icons">
+                        <i class="stat fa fa-spinner fa-spin pr-1"></i>
+                        <i class="fa fa-${icon_from_type(file.type)}"></i>
+                    </div>
+                    <div class="pl-1">${file.name}</div>
+                </div>
+            </li>`);
+    }
+    scroll_it_down(uplist);  // once at end
+};
+
+
+// convert a file's mime-type into a "fa" icon
+function icon_from_type(mimetype) {
+    let icon = icon_map[mimetype];                       // first attempt
+    if (!icon) {
+        const type = mimetype.split('/', 1)[0];         //  "type/subtype"
+        switch(type) {
+            case 'audio':
+            case 'image':
+            case 'text':
+            case 'video':
+                icon = `file-${type}-o`;
+                break;
+            case 'application':
+                icon = 'file-code-o';
+                break;
+            default:
+                icon = 'file-o';
+        };
+    };
+    return icon
+};
 // set icons for the drop target
 droptarget.set_icon = function (name) {
     this.html(`<i class="fa fa-${name}"></i>`);
@@ -86,52 +124,29 @@ function show_single_result(success) {
 }
 
 
+// warn/error when unsupported files found
+function show_unsavory_dialog(unsavory, mode='warn') {
+    const filelist = ['<p>'];
+    for (const name of unsavory) {
+        filelist.push(`<i class="fa fa-file-code-o ml-4"></i> ${name}<br>`);
+    }
+
+    const logmsg = render_err_unsavory(''),     // w/o filelist
+          msgbod = render_err_unsavory(filelist.join('\n'));
+    if (mode === 'warn') {
+        console.warn('upload:', logmsg);
+        show_warn_dialog(msgbod);
+    } else if (mode === 'error') {
+        console.error('upload:', logmsg);
+        show_err_dialog(msgbod);
+    };
+}
+
+
 // scroll uplist down to the last item
 function scroll_it_down(element) {  // watch out!  https://youtu.be/RZUq6N7Gx1c
     element.scrollTop(element.prop('scrollHeight'));
 }
-
-
-// add an upload item to the list for each file in the manifest
-function add_to_uplist(manifest) {
-    for (const file of manifest) {
-        uplist.append(`
-            <li id=f00>
-                <div class="d-flex">
-                    <div class="icons">
-                        <i class="stat fa fa-spinner fa-spin pr-1"></i>
-                        <i class="fa fa-${icon_from_type(file.type)}"></i>
-                    </div>
-                    <div class="pl-1">${file.name}</div>
-                </div>
-            </li>
-        `);
-        scroll_it_down(uplist);
-    }
-};
-
-
-// convert a file's mime-type into a "fa" icon
-function icon_from_type(mimetype) {
-    let icon = icon_map[mimetype];                       // first attempt
-    if (!icon) {
-        const type = mimetype.split('/', 1)[0];         //  "type/subtype"
-        switch(type) {
-            case 'audio':
-            case 'image':
-            case 'text':
-            case 'video':
-                icon = `file-${type}-o`;
-                break;
-            case 'application':
-                icon = 'file-code-o';
-                break;
-            default:
-                icon = 'file-o';
-        };
-    };
-    return icon
-};
 
 
 // prevent known-skeezy file types from entering our upload list
@@ -153,25 +168,19 @@ function check_unsavory_files(evt, files) {
             unsavory.push(file.name);
         }
     }
-
-    // TODO: dialog error should be broken out to own function.
-    if (unsavory.length) {
-        const filelist = ['<p>'];
-        for (const name of unsavory) {
-            filelist.push(`<i class="fa fa-file-code-o ml-4"></i> ${name}<br>`);
-        }
-
-        console.warn('upload:', render_err_unsavory(''));  // w/o filelist
-        show_err_dialog(render_err_unsavory(filelist.join('\n')));
-    }
-    return unsavory.length;
+    return unsavory;
 }
 
 
 // ---------------------------------------------------------------------------
 // traditional upload form
 
-$('#files').change(check_unsavory_files)    // on file selection change
+$('#files').change( (evt) => {     // on file selection change
+    const unsavory = check_unsavory_files(evt);
+    if (unsavory.length) {
+        show_unsavory_dialog(unsavory);
+    }
+})
 $('#upload_form').submit( (evt) => {        // on submit button
     const files = $('input#files')[0].files;
 
@@ -180,9 +189,12 @@ $('#upload_form').submit( (evt) => {        // on submit button
         console.error('upload on_submit:', msg);
         show_err_dialog(msg);
         evt.preventDefault();
+        return
+    }
 
-    } else if (check_unsavory_files(null, files)) {
-        console.error('upload on_submit: unsupported files, skipped.');
+    const unsavory = check_unsavory_files(null, files);
+    if (unsavory.length) {
+        show_unsavory_dialog(unsavory, 'error');
         evt.preventDefault();
     }
 });
@@ -339,8 +351,10 @@ $(document).on({
     },
     drop: (evt) => {
         evt.preventDefault();
-        const msg = ('Sorry, you missed the drop box, try again. ' +
-                     '<i class="fa fa-smile-o"></i>');
+        const msg = `Sorry, you missed the drop box, try again.
+                     Look for the box to the top left labeled "Drop Box."
+                     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
+        console.warn('drop: missed target.');
         show_warn_dialog(msg);
     }
 });
@@ -359,7 +373,6 @@ droptarget.on({
     dragover: (evt) => {
         evt.preventDefault();  // yes, this is needed.
     },
-
     drop: (evt) => {
         evt.preventDefault();
         evt.stopPropagation();  // prevents interference from document handler
@@ -374,12 +387,11 @@ droptarget.on({
         if (files.length) {
 
             // check types first
-            if (check_unsavory_files(null, files)) {
-                // this is the second error msg delivered, needs refr.
-                console.error('upload submit: unsupported files, skipped.');
+            const unsavory = check_unsavory_files(null, files);
+            if (unsavory.length) {
+                show_unsavory_dialog(unsavory);
                 return
             }
-            quantity.html(`(${files.length} dropped)`);
 
             // check sizes second
             const small_files = [], large_files = [], tasks = [];
@@ -406,6 +418,7 @@ droptarget.on({
             }
 
             // prepare and get started
+            quantity.html(`(${files.length} dropped)`);
             droptarget.show_busy();
             if (small_files.length) {
                 const fdata = new FormData();
