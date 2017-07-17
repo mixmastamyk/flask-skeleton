@@ -3,7 +3,6 @@
 //
 // TODO: make droptarget icon not interfere with drag
 // TODO: check unsavory to have one argument with type checking
-// TODO: flatten drop action
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -31,7 +30,7 @@ const msg_err_nofiles = 'No files found in drop action.  Please try again.';
 const msg_err_missed = `Sorry, you missed the drop box, try again.
     Look for the box to the top left labeled "Drop Box."
     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
-const msg_err_cowboy = `Woah there, cowboy! Hold yer horses.
+const msg_err_cowboy = `Woah there, cowboy! 🤠  Hold yer horses.
     <p>Can't ya see we're already a bit busy here?`.replace(/\s+/g, ' ');
 
 const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
@@ -335,7 +334,7 @@ function upload_file(location, file) {
 // Do async uploads in an orderly sequence :-P
 async function execute_task_sequence(tasks) {
     console.debug('execute task sequence…');
-    for (const [manifest, task] of tasks) {  // TODO let const
+    for (const [manifest, task] of tasks) {
 
         add_to_uplist(manifest);
         droptarget.show_busy();  // do every time, err may need to be reset
@@ -366,7 +365,7 @@ $(document).on({
     },
     drop: (evt) => {
         evt.preventDefault();
-        console.warn('drop: missed target.');
+        console.warn('drop: missed target. 😝');
         show_warn_dialog(msg_err_missed);
     }
 });
@@ -397,81 +396,77 @@ droptarget.on({
         evt.preventDefault();  // yes, this is needed.
     },
     drop: (evt) => {
-        // prepare for operation
+        // handle event and check a few things
         evt.preventDefault();
         evt.stopPropagation();  // prevent interference from doc handler above
         console.log('drop: occurred');
+        droptarget.removeClass('hover');
 
         // we're not already busy are we?
         if (droptarget.is_busy()) {
             console.error(msg_err_cowboy);
             show_err_dialog(msg_err_cowboy);
             return;
-        }
-        // no…
-        droptarget.removeClass('hover');
+        } // no…
         uplist.empty();
         quantity.empty();
 
-        // what did we get?
+        // what did we get? - check for files
         const files = evt.originalEvent.dataTransfer.files;
         console.log(`drop: ${files.length} file(s) dropped.`);
-        if (files.length) {  // check for files first
-
-            // check types second
-            const unsavory = check_unsavory_files(null, files);
-            if (unsavory.length) {
-                show_unsavory_dialog(unsavory);
-                return
-            }
-
-            // check sizes third
-            const small_files = [], large_files = [], tasks = [];
-            let total_size = 0;
-
-            for (const file of files) {
-                total_size += file.size
-                // sort files into 2 buckets depending on size
-                if (file.size > UPLOAD_FSIZE_THRESHOLD) {
-                    large_files.push(file);
-                } else {
-                    small_files.push(file);
-                }
-            }
-
-            console.debug('upload: total file size:',
-                           loc.format(total_size), 'bytes');
-            if (total_size > MAX_CONTENT_LENGTH) {
-                const msg = render_err_maxsize(loc, total_size);
-                console.error('upload:', msg);
-                uplist.empty();
-                show_err_dialog(msg);
-                return
-            }
-
-            // prepare and get started
-            quantity.html(`(${files.length} dropped)`);
-            if (small_files.length) {
-                const fdata = new FormData();
-                for (const file of small_files) {
-                    fdata.append('files[]', file, file.name);
-                }
-                tasks.push( [small_files, () =>  // defer promise w/ lambda
-                             upload_files_form(window.location.pathname, fdata,
-                                               small_files.length)] );
-            }
-            // send each large file separately
-            for (const file of large_files) {
-                tasks.push( [[file], () =>  // defer task promise w/ lambda
-                             upload_file(window.location.pathname, file)] );
-            }
-            // get busy
-            execute_task_sequence(tasks);
-
-        } else {
+        if (!files.length) {
             console.error('upload:', msg_err_nofiles);
             show_err_dialog(msg_err_nofiles);
+            return;
         }
+
+        // good, next check types
+        const unsavory = check_unsavory_files(null, files);
+        if (unsavory.length) {
+            show_unsavory_dialog(unsavory);
+            return;
+        }
+
+        // next, check sizes and total
+        const small_files = [], large_files = [], tasks = [];
+        let total_size = 0;
+        for (const file of files) {
+            total_size += file.size
+            // sort files into 2 buckets depending on size
+            if (file.size > UPLOAD_FSIZE_THRESHOLD) {
+                large_files.push(file);
+            } else {
+                small_files.push(file);
+            }
+        }
+        console.debug('upload: total file size:',
+                       loc.format(total_size), 'bytes');
+        if (total_size > MAX_CONTENT_LENGTH) {
+            const msg = render_err_maxsize(loc, total_size);
+            console.error('upload:', msg);
+            uplist.empty();
+            show_err_dialog(msg);
+            return
+        }
+
+        // prepare operation(s) and get started
+        quantity.html(`(${files.length} dropped)`);
+        if (small_files.length) {
+            const fdata = new FormData();
+            for (const file of small_files) {
+                fdata.append('files[]', file, file.name);
+            }
+            tasks.push( [small_files, () =>  // defer promise w/ lambda
+                         upload_files_form(window.location.pathname, fdata,
+                                           small_files.length)] );
+        }
+        // send each large file separately
+        for (const file of large_files) {
+            tasks.push( [[file], () =>  // defer task promise w/ lambda
+                         upload_file(window.location.pathname, file)] );
+        }
+        // get busy
+        execute_task_sequence(tasks);
     },
 });
 
