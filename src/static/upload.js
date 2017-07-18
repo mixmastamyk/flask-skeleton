@@ -1,7 +1,7 @@
 //
 // javascript handling drag, drop, and file uploading goes here.
 //
-// TODO: make droptarget icon not interfere with drag
+// TODO: find dropicon element and add/remove class instead:
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -32,8 +32,8 @@ const msg_err_network =
 const msg_err_missed = `Sorry, you missed the drop box, try again.
     Look for the box to the top-middle-left of the window labeled "Drop Box."
     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
-const msg_err_cowboy = `Woah there, cowboy! Hold yer horses.
-    <p>Can't ya see we're already a bit busy here? 🤠`.replace(/\s+/g, ' ');
+const msg_err_cowboy = `Woah there, cowboy! Hold yer horses. 🤠
+    <p>Can't ya see we're already a bit busy here?`.replace(/\s+/g, ' ');
 const msg_warn_quit = `Further uploads have been cancelled with the
     <kbd>ESC</kbd> key, finishing up current transfer.`.replace(/\s+/g, ' ');
 
@@ -78,18 +78,19 @@ function add_to_uplist(manifest) {
 // functions to manage state of the drop target/operation
 droptarget._quit = false;  // set true on esc/abort key
 droptarget.set_icon = function (name) {
-    this.html(`<i class="fa fa-${name}"></i>`);
+    // TODO: find element and add/remove class instead:
+    this.html(`<i id=dropicon class="fa fa-${name}"></i>`);
 };
 droptarget.is_busy = function () {
     return this._transfer_active || false;  // possibly undefined
 };
 droptarget.should_quit = function (value) {
-    if (typeof value !== 'undefined') {
+    if (typeof value !== 'undefined') {     // set
         if (value && !this._quit) {
             console.warn('should_quit:', msg_warn_quit);
         }
         this._quit = value;
-    } else {
+    } else {                                // get
         return this._quit;
     }
 };
@@ -357,6 +358,7 @@ async function execute_task_sequence(tasks) {
             console.debug('exec: quitting early.');
             break;
         }
+        // begin next task
         add_to_uplist(manifest);
         droptarget.show_busy();  // do every time, err may need to be reset
         if (DEBUG) { await sleep(COMPLETION_DELAY); }   // too darn fast :D
@@ -396,7 +398,7 @@ $(document).on({
         } else {
             is_esc = (evt.keyCode == 27);
         }
-        if (is_esc) {
+        if (is_esc && droptarget.is_busy()) {
             droptarget.should_quit(true);
             show_warn_dialog(msg_warn_quit);
         }

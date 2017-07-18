@@ -20,6 +20,7 @@
         font-size: 12rem;
         padding-top: 1rem;
         opacity: .1;
+        pointer-events: none;  /* muy importante */
     }
     #droptarget.hover {  /* :hover w/out drag gives wrong impression. */
         border-color: rgba(34, 34, 34, .3);
@@ -93,7 +94,7 @@
         A maximum of {{ config.UPLOAD_MAX_FILES }} files,
         with a total of {{ config.MAX_CONTENT_LENGTH_MB }}MB may be sent at
         once.
-        The <kbd>ESC</kbd> key can be used to skip subsequent transfers.
+        The <kbd>Esc</kbd> key can be used to skip subsequent transfers.
     </p>
 
     <form id=upload_form method=POST enctype="multipart/form-data">
@@ -102,7 +103,7 @@
             <div class="col-lg-8">
                 <strong>Drop Box</strong>
                 <div id=droptarget>
-                    <i class="fa fa-inbox"></i>
+                    <i id=dropicon class="fa fa-inbox"></i>
                 </div>
                 <progress id=main value=0 max=100></progress>
             </div>
