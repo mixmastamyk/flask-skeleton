@@ -2,14 +2,8 @@
 
 {% block title %}{{ title }}{% endblock %}
 
-{% set hicolor = '#0275d8' %}
 
 {% block xtrahead %}
-    <style type="text/css">  <!-- css variables, woot! -->
-        body {
-          --hicolor: {{ hicolor }};  /* color: var(--hicolor); */
-        }
-    </style>
     <link rel="stylesheet" href="/static/upload.css"/>
 {% endblock %}
 

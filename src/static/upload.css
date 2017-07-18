@@ -1,3 +1,8 @@
+/* css variables, woot! */
+:root {
+  --hicolor: #0275d8;
+}
+
 div#upbar {
     margin-bottom: 1em;
     margin-top: 1.5em;
@@ -34,12 +39,6 @@ progress#main {
     border-top: none;
     height: 1.2em;
 }
-progress.file {
-    height: 1ex;
-    width: 2em;
-    border: 1px solid var(--hicolor);
-    margin-right: .6em;
-}
 
 /* chrome/webkit stuff */
 progress::-webkit-progress-bar {
@@ -55,7 +54,6 @@ progress::-webkit-progress-value {
     height: 16.2rem;   /* #droptarget..height + progress#main..height */
     overflow-y: auto;
     padding: .2em;
-    zzpadding-left: 1em;
 }
 #uplist li {
     padding: .1em;
