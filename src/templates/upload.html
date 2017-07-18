@@ -5,84 +5,12 @@
 {% set hicolor = '#0275d8' %}
 
 {% block xtrahead %}
-<style type="text/css">
-
-    div#upbar {
-        margin-bottom: 1em;
-        margin-top: 1.5em;
-    }
-    #droptarget {
-        border: .16rem dashed rgba(34, 34, 34, .1);
-        height: 15rem;
-        text-align: center;
-    }
-    #droptarget i.fa {
-        font-size: 12rem;
-        padding-top: 1rem;
-        opacity: .1;
-        pointer-events: none;  /* muy importante */
-    }
-    #droptarget.hover {  /* :hover w/out drag gives wrong impression. */
-        border-color: rgba(34, 34, 34, .3);
-        box-shadow: .06em .06em .2em rgba(0, 0, 0, .2);
-    }
-    #droptarget.hover i.fa {
-        opacity: .2;
-    }
-    progress {
-        background-color: inherit;
-        width: 100%;
-
-        /* reset the default appearance */
-        -webkit-appearance: none;
-        -moz-appearance: none;
-             appearance: none;
-    }
-    progress#main {
-        border: .16rem dashed rgba(34, 34, 34, .1);
-        border-top: none;
-        height: 1.2em;
-    }
-    progress.file {
-        height: 1ex;
-        width: 2em;
-        border: 1px solid {{ hicolor }};
-        margin-right: .6em;
-    }
-
-    /* chrome/webkit stuff */
-    progress::-webkit-progress-bar {
-        background-color: inherit;
-    }
-    progress::-webkit-progress-value {
-        background-color: {{ hicolor }};
-    }
-
-    #uplist {
-        border: .16rem dashed rgba(34, 34, 34, .1);
-        border-left: 0;
-        height: 16.2rem;   /* #droptarget..height + progress#main..height */
-        overflow-y: auto;
-        padding: .2em;
-        zzpadding-left: 1em;
-    }
-    #uplist li {
-        padding: .1em;
-        padding-left: .5em;
-    }
-    #uplist li:nth-of-type(odd) {
-        background: #dcd9d9;
-    }
-    #uplist i.fa-check { color: green; }
-    #uplist i.fa-times { color: darkred; }
-    #uplist i.fa-spinner { color: {{ hicolor }}; }
-    #uplist div.icons {
-        flex-basis: content;
-        white-space: nowrap;
-    }
-}
-
-</style>
+    <style type="text/css">  <!-- css variables, woot! -->
+        body {
+          --hicolor: {{ hicolor }};  /* color: var(--hicolor); */
+        }
+    </style>
+    <link rel="stylesheet" href="/static/upload.css"/>
 {% endblock %}
 
 
@@ -92,13 +20,11 @@
         Media and data files may be uploaded by dropping them over the target
         below.
         A maximum of {{ config.UPLOAD_MAX_FILES }} files,
-        with a total of {{ config.MAX_CONTENT_LENGTH_MB }}MB may be sent at
-        once.
+        with a total of {{ config.MAX_CONTENT_LENGTH_MB }}MB may be sent at once.
         The <kbd>Esc</kbd> key can be used to skip subsequent transfers.
     </p>
 
     <form id=upload_form method=POST enctype="multipart/form-data">
-
         <div id=upbar class="row no-gutters">
             <div class="col-lg-8">
                 <strong>Drop Box</strong>
@@ -138,7 +64,7 @@
 {% endblock %}
 
 
-{% block postscript %}{# set constants and load upload.js #}
+{% block postscript %} {# set constants and load upload.js #}
 <script>
 'use strict';
 
@@ -151,6 +77,5 @@ const UPLOAD_UNSAVORY_EXTS = Object.freeze( new Set(
     {{ config.UPLOAD_UNSAVORY_EXTS | safe }}
 ));
 </script>
-
 <script src="/static/upload.js"></script>
 {% endblock %}

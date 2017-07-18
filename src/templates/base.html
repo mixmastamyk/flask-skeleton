@@ -11,14 +11,12 @@
         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
         integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
         crossorigin="anonymous">
-
-    <link rel="shortcut icon" href="/static/favicon.png">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Open+Sans">
-    <link rel="stylesheet"
-        href="/static/fa-min.css">
-    <link rel="stylesheet"
-        href="/static/custom.css">
+
+    <link rel="shortcut icon" href="/static/favicon.png">
+    <link rel="stylesheet" href="/static/fa-min.css">
+    <link rel="stylesheet" href="/static/custom.css">
     {% block xtrahead %}{% endblock %}
 </head>
 <body class="bg-inverse">
@@ -33,12 +31,12 @@
             </button>
 
             <a class="navbar-brand mr-4" href="/">
-                <img class="logo" src="/static/logo.svg">
+                <img class="logo" alt="{{ config.APP_FULLNAME }}"
+                     src="/static/logo.svg">
             </a>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-
                     <li class="nav-item">
                         <a class="nav-link" href="/blog/">News</a>
                     </li>
@@ -86,7 +84,7 @@
     {% endfor %}
 {% endwith %}
 
-<!-- Generic empty tab-modal message dialog -->
+<!-- Generic empty modal message dialog for use later -->
 <div id=msg_dialog class="modal fade hide" tabindex="-1">
   <div class="modal-dialog" role=document>
     <div class="modal-content bg-faded">
@@ -98,8 +96,8 @@
       </div>
       <div class="modal-body">∅</div>
       <div class="modal-footer">
-        <button type=button class="btn btn-primary" data-dismiss=modal>
-            <i class="fa fa-check"></i> Ok</button>
+          <button type=button class="btn btn-primary" data-dismiss=modal>
+              <i class="fa fa-check"></i> Ok</button>
       </div>
     </div>
   </div>
@@ -124,16 +122,16 @@
     <div class=container>
         <div class="py-5 text-muted">
             <div class=row>
+
                 <div class=col>
                     <div class="text-muted ">
-                        <img class="logo" src="/static/logo.svg"><br>
-                        ©2017&nbsp;Company,&nbsp;LLC.
+                        <img class="logo"  alt="{{ config.APP_FULLNAME }}"
+                             src="/static/logo.svg"><br>
+                        ©2017&nbsp;{{ config.APP_ORGNAME }},&nbsp;LLC.
                     </div>
                 </div>
 
-                <div class=col>
-                    &nbsp;
-                </div>
+                <div class=col>&nbsp;</div>
 
                 <div class=col>
                     <h6 class="ml-2">site</h6>
@@ -166,7 +164,7 @@
     </div>
 </footer>
 
-<!-- post-scripts -->
+<!-- postscripts -->
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
     integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
     crossorigin="anonymous"></script>
@@ -178,8 +176,8 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
     integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
     crossorigin="anonymous"></script>
-<script src="/static/app.js"></script>
 
+<script src="/static/app.js"></script>
 {% block postscript %}{% endblock %}
 
 </body>

@@ -5,7 +5,7 @@ import sys#, os
 from os.path import abspath, dirname, join
 from datetime import timedelta
 
-from .meta import fullname
+from .meta import orgname, fullname
 
 basedir = abspath(dirname(__file__))
 _1MB = 1000000
@@ -23,7 +23,17 @@ APP_DEFAULT_ROLE = dict(name='end-user', desc='Run of the mill user.')
 APP_MIN_PASSWD_LENGTH = 8
 APP_SECURITY_PREFIX = '/security'
 APP_FULLNAME = fullname
+APP_ORGNAME = orgname
 
+UPLOAD_CHUNK_LENGTH = 8 * _1MB
+UPLOADED_FILES_DEST = '/tmp'
+UPLOAD_FSIZE_THRESHOLD = _1MB
+UPLOAD_MAX_FILES = 20
+# var below needs to render in .gs, so leave as list:
+UPLOAD_UNSAVORY_EXTS = ['bat', 'cmd', 'exe', 'iso', 'php', 'vbs']
+
+
+# flask and extension config
 DEBUG_TB_INTERCEPT_REDIRECTS = False
 DEFAULT_TIMEZONE = 'America/Pacific'
 
@@ -42,6 +52,10 @@ MAIL_PASSWORD = 'password'
 MAIL_USE_SSL = True
 #~ SECURITY_SEND_REGISTER_EMAIL = (False if 'FLASK_DEBUG' in os.environ else True)
 SECURITY_SEND_REGISTER_EMAIL = False
+
+MAX_CONTENT_LENGTH_MB = 10  # MB (10³), not MiB (2¹⁰)
+#~ MAX_CONTENT_LENGTH_MB = 32
+MAX_CONTENT_LENGTH = MAX_CONTENT_LENGTH_MB * _1MB  # flask setting
 
 SECRET_KEY = 'Yabba Dabba Dooooooo!!!'
 
@@ -68,16 +82,6 @@ SQLALCHEMY_ECHO = False
 SQLALCHEMY_MIGRATE_REPO = join(basedir, 'migrations')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-# uploads
-MAX_CONTENT_LENGTH_MB = 10  # MB (10³), not MiB (2¹⁰)
-#~ MAX_CONTENT_LENGTH_MB = 32
-MAX_CONTENT_LENGTH = MAX_CONTENT_LENGTH_MB * _1MB  # flask setting
-UPLOAD_CHUNK_LENGTH = 8 * _1MB
-UPLOADED_FILES_DEST = '/tmp'
-UPLOAD_FSIZE_THRESHOLD = _1MB
-UPLOAD_MAX_FILES = 20
-# var below needs to render in .gs, so leave as list:
-UPLOAD_UNSAVORY_EXTS = ['bat', 'cmd', 'exe', 'iso', 'php', 'vbs']
 
 WTF_CSRF_ENABLED = True  # default, but just in case
 

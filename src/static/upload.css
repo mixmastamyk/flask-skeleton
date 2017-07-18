@@ -1,0 +1,73 @@
+div#upbar {
+    margin-bottom: 1em;
+    margin-top: 1.5em;
+}
+#droptarget {
+    border: .16rem dashed rgba(34, 34, 34, .1);
+    height: 15rem;
+    text-align: center;
+}
+#droptarget i.fa {
+    font-size: 12rem;
+    padding-top: 1rem;
+    opacity: .1;
+    pointer-events: none;  /* muy importante */
+}
+#droptarget.hover {  /* :hover w/out drag gives wrong impression. */
+    border-color: rgba(34, 34, 34, .3);
+    box-shadow: .06em .06em .2em rgba(0, 0, 0, .2);
+}
+#droptarget.hover i.fa {
+    opacity: .2;
+}
+progress {
+    background-color: inherit;
+    width: 100%;
+
+    /* reset the default appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+         appearance: none;
+}
+progress#main {
+    border: .16rem dashed rgba(34, 34, 34, .1);
+    border-top: none;
+    height: 1.2em;
+}
+progress.file {
+    height: 1ex;
+    width: 2em;
+    border: 1px solid var(--hicolor);
+    margin-right: .6em;
+}
+
+/* chrome/webkit stuff */
+progress::-webkit-progress-bar {
+    background-color: inherit;
+}
+progress::-webkit-progress-value {
+    background-color: var(--hicolor);
+}
+
+#uplist {
+    border: .16rem dashed rgba(34, 34, 34, .1);
+    border-left: 0;
+    height: 16.2rem;   /* #droptarget..height + progress#main..height */
+    overflow-y: auto;
+    padding: .2em;
+    zzpadding-left: 1em;
+}
+#uplist li {
+    padding: .1em;
+    padding-left: .5em;
+}
+#uplist li:nth-of-type(odd) {
+    background: #dcd9d9;
+}
+#uplist i.fa-check { color: green; }
+#uplist i.fa-times { color: darkred; }
+#uplist i.fa-spinner { color: var(--hicolor); }
+#uplist div.icons {
+    flex-basis: content;
+    white-space: nowrap;
+}

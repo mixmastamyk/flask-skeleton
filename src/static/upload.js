@@ -1,7 +1,6 @@
 //
 // javascript handling drag, drop, and file uploading goes here.
 //
-// TODO: find dropicon element and add/remove class instead:
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -76,10 +75,9 @@ function add_to_uplist(manifest) {
 
 
 // functions to manage state of the drop target/operation
-droptarget._quit = false;  // set true on esc/abort key
+droptarget._quit = false;                   // set true on abort (esc key)
 droptarget.set_icon = function (name) {
-    // TODO: find element and add/remove class instead:
-    this.html(`<i id=dropicon class="fa fa-${name}"></i>`);
+    $('#dropicon').removeClass(/* all */).addClass('fa fa-' + name);
 };
 droptarget.is_busy = function () {
     return this._transfer_active || false;  // possibly undefined
