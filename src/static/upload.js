@@ -2,7 +2,6 @@
 // javascript handling drag, drop, and file uploading goes here.
 //
 // TODO: make droptarget icon not interfere with drag
-// TODO: handle ESC key for abort.
 // TODO: max num of files
 'use strict';
 
@@ -33,6 +32,8 @@ const msg_err_missed = `Sorry, you missed the drop box, try again.
     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
 const msg_err_cowboy = `Woah there, cowboy! Hold yer horses.
     <p>Can't ya see we're already a bit busy here? 🤠`.replace(/\s+/g, ' ');
+const msg_warn_quit = `An early shutdown was requested,
+    finishing up current transfer.`.replace(/\s+/g, ' ');
 
 const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
 
@@ -73,11 +74,22 @@ function add_to_uplist(manifest) {
 
 
 // functions to manage state of the drop target/operation
+droptarget._quit = false;  // set true on esc/abort key
 droptarget.set_icon = function (name) {
     this.html(`<i class="fa fa-${name}"></i>`);
 };
 droptarget.is_busy = function () {
     return this._transfer_active || false;  // possibly undefined
+};
+droptarget.should_quit = function (value) {
+    if (typeof value !== 'undefined') {
+        if (value && !this._quit) {
+            console.warn('should_quit:', msg_warn_quit);
+        }
+        this._quit = value;
+    } else {
+        return this._quit;
+    }
 };
 droptarget.show_error = function () {
     this.set_icon('times-circle');
@@ -86,6 +98,7 @@ droptarget.show_ready = function () {
     body.css('cursor', 'default');
     this.set_icon('inbox');
     this._transfer_active = false;
+    this._quit = false;  // set false on esc/abort key
 };
 droptarget.show_busy  = function () {
     body.css('cursor', 'wait');
@@ -338,6 +351,10 @@ async function execute_task_sequence(tasks) {
     console.debug('execute task sequence…');
     for (const [manifest, task] of tasks) {
 
+        if (droptarget.should_quit()) {
+            console.debug('exec: quitting early.');
+            break;
+        }
         add_to_uplist(manifest);
         droptarget.show_busy();  // do every time, err may need to be reset
         if (DEBUG) { await sleep(COMPLETION_DELAY); }   // too darn fast :D
@@ -369,7 +386,18 @@ $(document).on({
         evt.preventDefault();
         console.warn('drop: missed target. 😝');
         show_warn_dialog(msg_err_missed);
-    }
+    },
+    keyup: (evt) => {  // https://stackoverflow.com/a/3369743/450917
+        let is_esc = false;
+        if ('key' in evt) {
+            is_esc = (evt.key == 'Escape' || evt.key == 'Esc');
+        } else {
+            is_esc = (evt.keyCode == 27);
+        }
+        if (is_esc) {
+            droptarget.should_quit(true);
+        }
+    },
 });
 
 
@@ -412,6 +440,7 @@ droptarget.on({
         } // no…
         uplist.empty();
         quantity.empty();
+        droptarget.should_quit(false);
 
         // what did we get? - check for files
         const files = evt.originalEvent.dataTransfer.files;
