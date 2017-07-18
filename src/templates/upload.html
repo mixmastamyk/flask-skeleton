@@ -88,8 +88,11 @@
 {% block body %}
     <h1><i class="fa fa-cloud-upload text-muted"></i> {{ title }}</h1>
     <p>
-        Media and data files (max: {{ config.MAX_CONTENT_LENGTH_MB }}MB) may be
-        uploaded by dropping them over the target below.
+        Media and data files may be uploaded by dropping them over the target
+        below.
+        A maximum of {{ config.UPLOAD_MAX_FILES }} files,
+        with a total of {{ config.MAX_CONTENT_LENGTH_MB }}MB may be sent at
+        once.
         The <kbd>ESC</kbd> key can be used to skip subsequent transfers.
     </p>
 
@@ -142,6 +145,7 @@ const DEBUG = {{ debug }};
 const LOCALE = 'en-US';
 const MAX_CONTENT_LENGTH = {{ config.MAX_CONTENT_LENGTH }};
 const UPLOAD_FSIZE_THRESHOLD = {{ config.UPLOAD_FSIZE_THRESHOLD }};
+const UPLOAD_MAX_FILES = {{ config.UPLOAD_MAX_FILES }};
 const UPLOAD_UNSAVORY_EXTS = Object.freeze( new Set(
     {{ config.UPLOAD_UNSAVORY_EXTS | safe }}
 ));

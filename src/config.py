@@ -75,6 +75,7 @@ MAX_CONTENT_LENGTH = MAX_CONTENT_LENGTH_MB * _1MB  # flask setting
 UPLOAD_CHUNK_LENGTH = 8 * _1MB
 UPLOADED_FILES_DEST = '/tmp'
 UPLOAD_FSIZE_THRESHOLD = _1MB
+UPLOAD_MAX_FILES = 20
 # var below needs to render in .gs, so leave as list:
 UPLOAD_UNSAVORY_EXTS = ['bat', 'cmd', 'exe', 'iso', 'php', 'vbs']
 

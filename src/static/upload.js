@@ -2,7 +2,6 @@
 // javascript handling drag, drop, and file uploading goes here.
 //
 // TODO: make droptarget icon not interfere with drag
-// TODO: max num of files
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -24,16 +23,19 @@ const render_err_zerofiles = () =>
 const render_server_resp = (req, type) =>
     `The server responded with the ${type} message:
      <p>${req.status} ${req.statusText}`.replace(/\s+/g, ' ');
-const err_network =
-    'A low-level network error occurred, or the connection was reset.';
+const render_err_toomany = (num, max) =>
+    `The number of files requested (${num}) is greater than the maximum limit
+     of ${max}. Please try again.`.replace(/\s+/g, ' ');
 const msg_err_nofiles = 'No files found in drop action.  Please try again.';
+const msg_err_network =
+    'A low-level network error occurred, or the connection was reset.';
 const msg_err_missed = `Sorry, you missed the drop box, try again.
-    Look for the box to the top left labeled "Drop Box."
+    Look for the box to the top-middle-left of the window labeled "Drop Box."
     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
 const msg_err_cowboy = `Woah there, cowboy! Hold yer horses.
     <p>Can't ya see we're already a bit busy here? 🤠`.replace(/\s+/g, ' ');
-const msg_warn_quit = `An early shutdown was requested,
-    finishing up current transfer.`.replace(/\s+/g, ' ');
+const msg_warn_quit = `Further uploads have been cancelled with the
+    <kbd>ESC</kbd> key, finishing up current transfer.`.replace(/\s+/g, ' ');
 
 const rmtags = (text) => text.replace(/(<([^>]+)>)/ig, '');  // html cleaner
 
@@ -261,9 +263,9 @@ function start_handler(evt) {
 
 function err_handler(evt) {
     // err handler only fires on low-level network errors, not most http errs
-    console.error('upload: ', err_network);
+    console.error('upload: ', msg_err_network);
     droptarget.show_error();
-    show_err_dialog(err_network);
+    show_err_dialog(msg_err_network);
 };
 
 
@@ -396,6 +398,7 @@ $(document).on({
         }
         if (is_esc) {
             droptarget.should_quit(true);
+            show_warn_dialog(msg_warn_quit);
         }
     },
 });
@@ -434,7 +437,7 @@ droptarget.on({
 
         // we're not already busy are we?
         if (droptarget.is_busy()) {
-            console.error(msg_err_cowboy);
+            console.log(msg_err_cowboy);
             show_err_dialog(msg_err_cowboy);
             return;
         } // no…
@@ -443,11 +446,16 @@ droptarget.on({
         droptarget.should_quit(false);
 
         // what did we get? - check for files
-        const files = evt.originalEvent.dataTransfer.files;
+        const files = evt.originalEvent.dataTransfer.files;  // firefox: slow !
         console.log(`drop: ${files.length} file(s) dropped.`);
         if (!files.length) {
             console.error('upload:', msg_err_nofiles);
             show_err_dialog(msg_err_nofiles);
+            return;
+        } else if (files.length > UPLOAD_MAX_FILES) {
+            const msg = render_err_toomany(files.length, UPLOAD_MAX_FILES);
+            console.error('upload:', msg);
+            show_err_dialog(msg);
             return;
         }
 
@@ -458,7 +466,7 @@ droptarget.on({
             return;
         }
 
-        // next, check sizes and total
+        // next check sizes and total
         const small_files = [], large_files = [], tasks = [];
         let total_size = 0;
         for (const file of files) {
