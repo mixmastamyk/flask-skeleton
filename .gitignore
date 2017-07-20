@@ -109,3 +109,4 @@ readme.html
 rootfs/
 src/app.db
 src/static/docs
+.eslintcache

@@ -1,0 +1,175 @@
+env:
+    browser: true
+    es6: true
+    jquery: true
+
+
+extends: 'eslint:recommended'
+
+
+parserOptions:
+    ecmaVersion: 2017  # aka v8
+    ecmaFeatures:
+        #~ impliedStrict: true
+
+
+globals:
+    DEBUG: false,
+    LOCALE: false,
+    show_err_dialog: false,
+    show_warn_dialog: false,
+    sleep: false,
+
+
+rules:
+    arrow-spacing:
+        - warn
+
+    block-spacing:
+        - error
+
+    brace-style:
+        - error
+        - 1tbs
+        - allowSingleLine: True
+
+    comma-dangle:
+        - error
+        - always-multiline
+
+    comma-spacing:
+        - warn
+
+    default-case:
+        - warn
+
+    eol-last:
+        - error
+
+    id-length:
+        - error
+        - max: 30
+          min: 3
+
+    indent:
+        - error
+        - 4
+        - SwitchCase: 1
+          CallExpression:
+            arguments: off
+
+    linebreak-style:
+        - error
+        - unix
+
+    max-len:
+        - error
+        - code: 80
+          ignoreUrls: True
+          tabWidth: 4
+
+    no-alert:
+        - error
+
+    no-console:
+        - off
+
+    no-eval:
+        - error
+
+    no-irregular-whitespace:
+        - error
+        - skipStrings: True
+          skipTemplates: True
+
+    no-lonely-if:
+        - error
+
+    no-magic-numbers:
+        - warn
+        - enforceConst: True
+          ignore: [0, 1, 100]
+          ignoreArrayIndexes: True
+
+    no-multi-spaces:
+        - warn
+        - ignoreEOLComments: True
+
+
+    no-multiple-empty-lines:
+        - warn
+        - max: 2
+
+    no-negated-condition:
+        - error
+
+    no-tabs:
+        - warn
+
+    no-trailing-spaces:
+        - error
+
+    no-undef-init:
+        - error
+
+    no-unneeded-ternary:
+        - error
+
+    no-unused-vars:
+        - error
+        - argsIgnorePattern: '^_'
+
+    no-use-before-define:
+        - error
+        - functions: False
+
+    no-var:
+        - error
+
+    no-warning-comments:
+        - warn
+
+    prefer-const:
+        - error
+
+    prefer-rest-params:
+        - error
+
+    prefer-spread:
+        - error
+
+    quotes:
+        - error
+        - single
+
+    rest-spread-spacing:
+        - warn
+
+    semi:
+        - error
+        - always
+
+    semi-spacing:
+        - warn
+
+    space-infix-ops:
+        - warn
+
+    spaced-comment:
+        - warn
+        - always
+        - markers:
+            - '~'
+
+    strict:
+        - error
+        - global
+
+    switch-colon-spacing:
+        - error
+
+    template-tag-spacing:
+        - error
+
+    unicode-bom:
+        - warn

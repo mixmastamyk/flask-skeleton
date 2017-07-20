@@ -1,6 +1,15 @@
 //
 // javascript handling drag, drop, and file uploading goes here.
 //
+/* global
+    MAX_CONTENT_LENGTH,
+    show_err_dialog,
+    show_warn_dialog,
+    sleep,
+    UPLOAD_FSIZE_THRESHOLD,
+    UPLOAD_MAX_FILES,
+    UPLOAD_UNSAVORY_EXTS,
+*/
 'use strict';
 
 const loc = new Intl.NumberFormat(LOCALE);  // localize big numbers
@@ -11,11 +20,11 @@ const render_err_maxsize = (loc, total_size) =>
     than the maximum limit of ${loc.format(MAX_CONTENT_LENGTH)} bytes—skipping
     submission.
     <p>Kindly try again with a smaller file set.`
-    .replace(/\s+/g, ' ');  // normalizes string for console log
+        .replace(/\s+/g, ' ');  // normalizes string for console log
 const render_err_unsavory = (filelist) =>
     `Unsupported file types were selected. Kindly drop another set of files or
     select with the Browse… (Choose files) button.  ${filelist}`
-    .replace(/\s+/g, ' ');
+        .replace(/\s+/g, ' ');
 const render_err_zerofiles = () =>
     `No files were selected.  Kindly choose a file with the Browse…
      (Choose files) button and try again.`.replace(/\s+/g, ' ');
@@ -31,7 +40,7 @@ const msg_err_network =
 const msg_err_missed = `Sorry, you missed the drop box, try again.
     Look for the box to the top-middle-left of the window labeled "Drop Box."
     <i class="fa fa-smile-o"></i>`.replace(/\s+/g, ' ');
-const msg_err_cowboy = `Woah there, cowboy! Hold yer horses. 🤠
+const msg_err_cowboy = `Woah there, cowboy!  Hold yer horses. 🤠
     <p>Can't ya see we're already a bit busy here?`.replace(/\s+/g, ' ');
 const msg_warn_quit = `Further uploads have been cancelled with the
     <kbd>ESC</kbd> key, finishing up current transfer.`.replace(/\s+/g, ' ');
@@ -71,7 +80,7 @@ function add_to_uplist(manifest) {
             </li>`);
     }
     scroll_it_down(uplist);  // once at end
-};
+}
 
 
 // functions to manage state of the drop target/operation
@@ -83,13 +92,13 @@ droptarget.is_busy = function () {
     return this._transfer_active || false;  // possibly undefined
 };
 droptarget.should_quit = function (value) {
-    if (typeof value !== 'undefined') {     // set
+    if (typeof value === 'undefined') {     // get
+        return this._quit;
+    } else {                                // set
         if (value && !this._quit) {
             console.warn('should_quit:', msg_warn_quit);
         }
         this._quit = value;
-    } else {                                // get
-        return this._quit;
     }
 };
 droptarget.show_error = function () {
@@ -125,10 +134,10 @@ function icon_from_type(mimetype) {
                 break;
             default:
                 icon = 'file-o';
-        };
-    };
-    return icon
-};
+        }
+    }
+    return icon;
+}
 
 
 // set icons for the upload list items
@@ -144,7 +153,7 @@ function show_results(success) {
         set_uplist_icons(icons, 'check');
     } else {
         set_uplist_icons(icons, 'times');
-    };
+    }
 }
 
 
@@ -155,26 +164,26 @@ function show_single_result(success) {
         set_uplist_icons(icon, 'check');
     } else {
         set_uplist_icons(icon, 'times');
-    };
+    }
 }
 
 
 // warn/error when unsupported files found
-function show_unsavory_dialog(unsavory, mode='warn') {
+function show_unsavory_dialog(unsavory, mode = 'warn') {
     const filelist = ['<p>'];
     for (const name of unsavory) {
         filelist.push(`<i class="fa fa-file-code-o ml-4"></i> ${name}<br>`);
     }
 
-    const logmsg = render_err_unsavory(''),     // w/o filelist
-          msgbod = render_err_unsavory(filelist.join('\n'));
+    const logmsg = render_err_unsavory('');     // w/o filelist
+    const msgbod = render_err_unsavory(filelist.join('\n'));
     if (mode === 'warn') {
         console.warn('upload:', logmsg);
         show_warn_dialog(msgbod);
     } else if (mode === 'error') {
         console.error('upload:', logmsg);
         show_err_dialog(msgbod);
-    };
+    }
 }
 
 
@@ -216,7 +225,7 @@ $('#files').change( (evt) => {     // on file selection change
     if (unsavory.length) {
         show_unsavory_dialog(unsavory);
     }
-})
+});
 $('#upload_form').submit( (evt) => {        // on submit button
     const files = $('input#files')[0].files;
 
@@ -225,7 +234,7 @@ $('#upload_form').submit( (evt) => {        // on submit button
         console.error('upload on_submit:', msg);
         show_err_dialog(msg);
         evt.preventDefault();
-        return
+        return;
     }
 
     const unsavory = check_unsavory_files(files);
@@ -240,6 +249,9 @@ $('#upload_form').submit( (evt) => {        // on submit button
 // ajax upload functions
 
 const COMPLETION_DELAY = 2000;  // ms, for perception of work with tiny files.
+const HTTP_OK = 200, HTTP_REDIRECT = 300;
+const ESC_CODE = 27;
+const PATH = window.location.pathname;
 
 
 function prog_handler(evt) {
@@ -250,28 +262,27 @@ function prog_handler(evt) {
     } else {
         console.debug('upload progress: not computable.');
     }
-};
+}
 
 
-function start_handler(evt) {
+function start_handler(_evt) {
     console.debug('upload: start…');
     progbar.attr('value', 0);
     progbar.attr('max', 100);
-};
+}
 
 
-function err_handler(evt) {
+function err_handler(_evt) {
     // err handler only fires on low-level network errors, not most http errs
     console.error('upload: ', msg_err_network);
     droptarget.show_error();
     show_err_dialog(msg_err_network);
-};
-
+}
 
 function loadend_handler(evt) {     // upon completion or http error
     const req = evt.target;
 
-    if (req.status >= 200 && req.status < 300) {
+    if (req.status >= HTTP_OK && req.status < HTTP_REDIRECT) {
         const msg = render_server_resp(req, 'status');
         console.log('upload end:', rmtags(msg));
         req._show_results(true);
@@ -287,7 +298,7 @@ function loadend_handler(evt) {     // upon completion or http error
         req._show_results();
         show_err_dialog(msg);
     }
-};
+}
 
 
 // send small files at once as a form
@@ -314,7 +325,7 @@ function upload_files_form(location, formdata, numfiles) {
         req.setRequestHeader('Accept', 'application/json');
         req.send(formdata);
     });
-};
+}
 
 
 // send big files separately with a binary put
@@ -344,7 +355,7 @@ function upload_file(location, file) {
         req.setRequestHeader('X-File-Name', file.name);
         req.send(file);
     });
-};
+}
 
 
 // Do async uploads in an orderly sequence :-P
@@ -394,7 +405,7 @@ $(document).on({
         if ('key' in evt) {
             is_esc = (evt.key == 'Escape' || evt.key == 'Esc');
         } else {
-            is_esc = (evt.keyCode == 27);
+            is_esc = (evt.keyCode == ESC_CODE);
         }
         if (is_esc && droptarget.is_busy()) {
             droptarget.should_quit(true);
@@ -408,7 +419,7 @@ function drag_end_handler(evt) {
     evt.preventDefault();
     console.debug('drag: end/exit/leave');
     droptarget.removeClass('hover');
-};
+}
 
 
 // configure the drop target
@@ -446,7 +457,7 @@ droptarget.on({
         droptarget.should_quit(false);
 
         // what did we get? - check for files
-        const files = evt.originalEvent.dataTransfer.files;  // firefox: slow !
+        const files = evt.originalEvent.dataTransfer.files;  // firefox: slow !
         console.log(`drop: ${files.length} file(s) dropped.`);
         if (!files.length) {
             console.error('upload:', msg_err_nofiles);
@@ -470,7 +481,7 @@ droptarget.on({
         const small_files = [], large_files = [], tasks = [];
         let total_size = 0;
         for (const file of files) {
-            total_size += file.size
+            total_size += file.size;
             // sort files into 2 buckets depending on size
             if (file.size > UPLOAD_FSIZE_THRESHOLD) {
                 large_files.push(file);
@@ -485,7 +496,7 @@ droptarget.on({
             console.error('upload:', msg);
             uplist.empty();
             show_err_dialog(msg);
-            return
+            return;
         }
 
         // prepare operation(s) and get started
@@ -495,14 +506,15 @@ droptarget.on({
             for (const file of small_files) {
                 fdata.append('files[]', file, file.name);
             }
-            tasks.push( [small_files, () =>  // defer promise w/ lambda
-                         upload_files_form(window.location.pathname, fdata,
-                                           small_files.length)] );
+            tasks.push([
+                small_files,
+                // defer promise w/ lambda
+                () => upload_files_form(PATH, fdata, small_files.length),
+            ]);
         }
         // send each large file separately
         for (const file of large_files) {
-            tasks.push( [[file], () =>  // defer task promise w/ lambda
-                         upload_file(window.location.pathname, file)] );
+            tasks.push([ [file], () => upload_file(PATH, file) ]);  // defer
         }
         // get busy
         execute_task_sequence(tasks);
