@@ -22,17 +22,17 @@ It includes:
   - SQL Alchemy configured
   - User and Role model
   - Organization model, for multi-tenant apps.
+  - Common fields for inheritance (id, name, description, created, updated, etc)
+  - Automatic REST API for models
   - Migration support configured
-  - Common fields for inheritence
 
-- Automatic REST API for models
 - Admin on ``/admin``
-- Security:
+- Security views on ``/security/``:
 
   - Registration w/ email confirmation
   - Login:
 
-    - Required by all views
+    - Required by all views, exception available
     - bcrypt password hashing
 
       - Implemented in admin app as well.
@@ -46,18 +46,26 @@ It includes:
 
   - Welcome page
   - User Profile page, on ``/profile``.
-  - File upload page (with multiple selection), on ``/upload``.
+  - File upload page (DND, multiple selection), on ``/upload``.
 
-- Docs: ``readme.rst`` created and sphinx configured:
+- Documentation:
 
-  - RTD theme.
+  - ``readme.rst`` 👀
+  - Sphinx configured w/ RTD theme.
   - Edit ``.rst`` files under ``./docs``.
   - Run ``make html`` to build docs.
     View locally under ``_build/html/index.html`` or
     served from ``/static/docs/``.
 
-- Debug Toolbar, loaded when debug enabled.
-- Testing skeleton ready.
+- Troubleshooting, QA
+
+  - Debug Toolbar, loaded when debug enabled.
+  - Testing skeleton under ``./tests``
+  - Linting configuration for:
+
+    - Flake8 (pyflakes, pep8)
+    - eslint
+    - stylelint
 
 - Front end:
 
@@ -66,7 +74,8 @@ It includes:
   - FontAwesome 4.6
   - A few simple templates and views
 
-- Meta:
+
+- Operations:
 
   - ``setup.py`` ready for packaging,
     reads ``meta.py`` and ``readme.rst`` for metadata.
@@ -75,10 +84,6 @@ It includes:
 
   - Python logging configured to stdout,
     as appropriate for debugging or systemd service.
-
-
-- Operations:
-
 
   - ``mkaci`` - a script to create an ACI container for running under rkt.
 
