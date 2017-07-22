@@ -28,8 +28,8 @@ migrate = Migrate(app, db)
 
 
 # additional imports below to avoid circular import issues with app, db, etc.
-from .logcfg import log
-from . import  database, models, forms, views, admin, utils, errors
+from .logcfg import log  # noqa: E402
+from . import database, models, forms, views, admin, utils, errors  # noqa: E402
 
 # security package
 user_datastore = SQLAlchemyUserDatastore(db, database.Users, database.Roles)
@@ -38,10 +38,10 @@ security = Security(app, user_datastore,
                     confirm_register_form=forms.ExRegForm,
                     send_confirmation_form=forms.ExSendConfForm,
                     forgot_password_form=forms.ExForgotPasswordForm,
-)
+                   )
 
 # flask-restless shenanigans:
-from .auth import rest_preprocessors
+from .auth import rest_preprocessors  # noqa: E402
 api = APIManager(app, flask_sqlalchemy_db=db, preprocessors=rest_preprocessors)
 # register models
 database.register_models_with_api(database, api)
@@ -64,14 +64,12 @@ else:
     database.initdb()
 
 
-
 # modify jinja defaults, strip extra whitespace
 app.jinja_options = dict(**app.jinja_options.copy(),
-    trim_blocks=True,
-    lstrip_blocks=True,
-)
+                         trim_blocks=True,
+                         lstrip_blocks=True,
+                        )
 
-admin, utils, views, errors  # no-op - shut up pyflakes
-atexit.register(on_shutdown)  # still needs a signal handler
+admin, utils, views, errors     # no-op - shut up pyflakes
+atexit.register(on_shutdown)    # still needs a signal handler
 log.info('By your command…')
-

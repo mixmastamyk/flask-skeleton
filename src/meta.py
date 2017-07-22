@@ -24,13 +24,14 @@ __copyright__   = copyright = '%s, %s' % (copyright_date, orgname)
 
 description     = 'A_short_descriptive_blurb_to_explain_the_project_goes_here.'
 # delete this line and line below when description has been updated:
-description    += ' (Edit title, version, and this description, etc. in ../main/meta.py)'
+description    += ''' (Edit title, version, and this description, etc. in
+                      ../main/meta.py) '''
 email           = 'foo@bar.com',
 
 #~ __license__     = license = 'Proprietary, see LICENSE file for details.'
 __license__     = license = 'Unlicense, The - https://unlicense.org'
 
-pkg_reqs        = (    # for setup.py
+pkg_reqs        = (  # for setup.py
     'bcrypt',
     'flask>=0.12',
     'flask-admin',
@@ -57,7 +58,7 @@ repo_account    = 'ACCOUNT_NAME'
 repo_name       = 'REPO_NAME'
 repo_provider   = 'github.com'
 #~ repo_provider   = 'bitbucket.org'
-repo_url        = 'https://%s/%s/%s' % (repo_provider, repo_account,repo_name),
+repo_url        = 'https://%s/%s/%s' % (repo_provider, repo_account, repo_name),
 
 
 class defaults:

@@ -20,7 +20,8 @@
 import sys, os
 sys.path.insert(0, os.path.abspath('../main'))
 
-from meta import (authors, copyright_date, description, fullname, __version__)
+from meta import (authors, copyright_date, description,
+                  fullname, __version__)  # noqa: E402
 
 
 # -- General configuration ------------------------------------------------
@@ -130,4 +131,3 @@ rst_prolog = '''
 .. |description| replace:: *%s*
 
 ''' % (project, description)
-

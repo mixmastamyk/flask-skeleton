@@ -9,7 +9,7 @@ from .main import app, user_datastore
 
 def auth_handler(username, password):
     user = user_datastore.find_user(email=username)
-    if username == user.email and  verify_password(password, user.password):
+    if username == user.email and verify_password(password, user.password):
         return user
 
 
@@ -45,4 +45,3 @@ validators = [check_auth]
 
 # configure all for authentication
 rest_preprocessors = { key: validators for key in keys }
-

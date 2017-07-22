@@ -25,7 +25,7 @@ ul.nav-tabs li.active a {
     color: #222;
 }
 
-form.admin-form input[type="checkbox"] { /* left-align, prevent centering */
+form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
     width: 2em;
     height: 2em;
     transform: scale(2, 2);
@@ -36,10 +36,10 @@ form.admin-form input[type="checkbox"] { /* left-align, prevent centering */
     background-color: #c2c0c0;
     opacity: 1;
 }
-.select2-container .select2-choice, .select2-container .select2-choices, .select2-container .select2-choices .select2-search-field input {
+
+.select2-container .select2-choice, .select2-container .select2-choices,
+.select2-container .select2-choices .select2-search-field input {
     background: #d2d0d0;
 }
 
 /* Tone down white backgrounds, end */
-
-

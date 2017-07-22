@@ -22,4 +22,3 @@ MAIL_USE_SSL = True
 SECURITY_SEND_REGISTER_EMAIL = (False if 'FLASK_DEBUG' in os.environ else True)
 
 SECRET_KEY = 'Yabba Dabba Dooooooo!!! @#$%^&*'
-

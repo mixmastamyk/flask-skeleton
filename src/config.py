@@ -1,7 +1,7 @@
 '''
     This is the common config file.
 '''
-import sys#, os
+import sys  #, os
 from os.path import abspath, dirname, join
 from datetime import timedelta
 
@@ -90,7 +90,7 @@ WTF_CSRF_ENABLED = True  # default, but just in case
 
 try:  # may overwrite vars above
     sys.path.append('..')
-    from config_local import *
+    from config_local import *  # noqa: F403, F401
     sys.path.pop()
 except ImportError:
     from logcfg import log

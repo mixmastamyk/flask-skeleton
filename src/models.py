@@ -20,4 +20,3 @@
 #~ class Thing(MultiTenantBase, db.Model):
     #~ ''' Descriptive_text_goes_here. '''
     #~ pass
-

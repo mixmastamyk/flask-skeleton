@@ -2,7 +2,7 @@
     Manually configured and automatic forms defined here.
 '''
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, SubmitField # BooleanField
+from wtforms import PasswordField, StringField, SubmitField  #, BooleanField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import InputRequired, Email, Length
 from wtforms_alchemy import model_form_factory
@@ -32,6 +32,7 @@ class ExRegForm(ConfirmRegisterForm):
 class ExSendConfForm(SendConfirmationForm):
     submit = SubmitField('Resend Confirmation')
 
+
 class ExForgotPasswordForm(ForgotPasswordForm):
     submit = SubmitField('Reset Password')
 
@@ -48,4 +49,3 @@ class UserForm(ModelForm):
             #~ name email timezone desc
         #~ '''.split())
         only = tuple('name email timezone desc'.split())
-

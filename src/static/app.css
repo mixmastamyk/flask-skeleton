@@ -1,8 +1,9 @@
 body {
-    font-family: 'Open Sans',/* bootstrap follows */-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-family: 'Open Sans', /* bootstrap follows */-apple-system, system-ui,
+        BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+        sans-serif;
     color: #343030;  /* slight red-shift */
 }
-
 
 main {
     background-color: #d4d0d0; /* slight red-shift */
@@ -10,12 +11,9 @@ main {
     min-height: 40rem;
 }
 
-
 footer {
     position: sticky;
 }
-
-
 
 h1, h2, h3, h4, h5, h6, .h2, .h3 {
     font-weight: bold;
@@ -62,11 +60,6 @@ div.alert-fixed {
     z-index: 9999;
     box-shadow: .02em .1em .4em rgba(0,0,0,.2);
 }
-
-
-
-
-
 
 
 @font-face {

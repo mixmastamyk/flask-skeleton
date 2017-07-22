@@ -48,7 +48,7 @@ class AdminModelView(ModelView):
         'created_at': {'readonly': True},
         'current_login_at': {'readonly': True},
         'current_login_ip': {'readonly': True},
-        'desc': { 'rows': 3, 'maxlength':'255'},
+        'desc': { 'rows': 3, 'maxlength': '255'},
         'last_login_at': {'readonly': True},
         'last_login_ip': {'readonly': True},
         'login_count': {'readonly': True},
@@ -73,19 +73,19 @@ class UserView(AdminModelView):
                          'timezone2', 'desc')
 
     form_edit_rules   = ('admin', 'email', 'name', 'password2', 'timezone2',
-                         'org', 'roles', 'desc', 'confirmed_at',
-    )
+                         'org', 'roles', 'desc', 'confirmed_at')
+
     # Special password handling:
     # https://github.com/sasaporta/flask-security-admin-example/blob/master/main.py
     # First, we want to encrypt the password before storing in the database.
     # Second, we want to use a password field (with the input masked) rather
     # than a regular text field.
     form_extra_fields = {
-        'password2': PasswordField('New Password',), # [Length(MIN_LEN)]
+        'password2': PasswordField('New Password',),  # [Length(MIN_LEN)]
         'timezone2': Select2Field('Timezone (write only)', choices=all_tz, ),
     }
 
-    def on_form_prefill(self, form, id): # doesn't work
+    def on_form_prefill(self, form, id):  # doesn't work
         #~ form.timezone2.data = 'US/Mountain'
         #~ form.timezone2.process_data(3)
         #~ form.timezone2.process_data('US/Mountain')
@@ -100,10 +100,12 @@ class UserView(AdminModelView):
         if data != '':
             model.timezone = data
 
+
 class OrgView(AdminModelView):
     column_list = ('name', 'updated_at', 'desc')    # order
     form_create_rules = ('name', 'users', 'desc')
     form_edit_rules = ('name', 'users', 'desc')
+
 
 class RoleView(AdminModelView):
     form_create_rules = ('name', 'users', 'org', 'desc')
@@ -114,4 +116,3 @@ log.info('adding admin views.')
 admin.add_view(OrgView(Orgs, db.session))
 admin.add_view(RoleView(Roles, db.session))
 admin.add_view(UserView(Users, db.session))
-

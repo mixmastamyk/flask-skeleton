@@ -12,6 +12,7 @@ class CustomJSONEncoder(JSONEncoder):
             return str(obj)
         return JSONEncoder.default(self, obj)
 
+
 app.json_encoder = CustomJSONEncoder
 
 

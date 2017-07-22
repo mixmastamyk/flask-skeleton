@@ -20,4 +20,3 @@ def handle_exception(err):
     #~ log.error(msg)
     log.exception(msg)
     return msg
-

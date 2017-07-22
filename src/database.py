@@ -71,8 +71,8 @@ class Roles(MultiTenantBase, RoleMixin, db.Model):
 
 # create M2M table for flask_security
 roles_users = Table('roles_users', db.Model.metadata,
-        Column('user_id', Integer(), ForeignKey('users.id')),
-        Column('role_id', Integer(), ForeignKey('roles.id'))
+                    Column('user_id', Integer(), ForeignKey('users.id')),
+                    Column('role_id', Integer(), ForeignKey('roles.id')),
 )
 
 

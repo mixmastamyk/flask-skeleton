@@ -37,7 +37,7 @@ setup(
     # include templates and static files
     package_data      = { appname_low:
                           ['templates/*', 'templates/*/*', 'static/*'] },
-    url               = repo_url ,
+    url               = repo_url,
     version           = __version__,
 
     #~ scripts           = (join(appname_low, appname_low),),  # cli
@@ -59,7 +59,8 @@ setup(
         #~ 'License :: Other/Proprietary License',
         #~ 'License :: OSI Approved :: BSD License',
         #~ 'License :: OSI Approved :: MIT License',
-        #~ 'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        #~ 'License :: OSI Approved ::
+        #~      GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',

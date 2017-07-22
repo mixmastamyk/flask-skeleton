@@ -28,7 +28,7 @@ from .main import app, db
 from . import utils
 
 
-SKIP_LOGIN =  ('static', '_default_auth_request_handler')
+SKIP_LOGIN = ('static', '_default_auth_request_handler')
 app_debug = app.debug
 sec_bp = app.config.get('SECURITY_BLUEPRINT_NAME', 'security')
 
@@ -65,7 +65,7 @@ def routes():
 
 
 @app.route('/status/<int:code>', methods=('DELETE', 'GET', 'HEAD', 'OPTIONS',
-                                         'POST', 'PUT'))
+                                          'POST', 'PUT'))
 def status(code):
     ''' For client debugging purposes. '''
     title = http_status_text.get(code, 'Unknown')
@@ -110,7 +110,7 @@ def show_profile():
 
 @app.route('/upload', methods=('GET', 'POST'))
 def upload_file():
-    if request.method =='POST':
+    if request.method == 'POST':
         files = request.files.getlist('files[]')
         for f in files:
             # double check for errors that made it thru javascript gauntlet:
@@ -146,7 +146,7 @@ def upload_file():
 @app.route('/upload', methods=('PUT',))
 def upload_file_put():
 
-    filename = secure_filename(request.headers.get('X-File-Name','upload.dat'))
+    filename = secure_filename(request.headers.get('X-File-Name', 'upload.dat'))
     con_len = request.headers.get('Content-Length', 0)
 
     if splitext(filename)[1][1:] in UPLOAD_UNSAVORY_EXTS:

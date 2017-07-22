@@ -24,10 +24,10 @@ DEBUG = logging.DEBUG
 log = logging.getLogger()
 # does Symbola font exist?
 exist_font = glob(expanduser('~/.fonts/[Ss]ymbola*.???'))
+Formatter_format = Formatter.format  # shortcut
 
 
 # logging classes
-Formatter_format = Formatter.format  # shortcut
 class ColorFmtr(Formatter):
     ''' Colors the levelname of a log message. '''
     def __init__(self, *args, **kwargs):
@@ -61,7 +61,7 @@ class ColorFmtr(Formatter):
         for levelname in colormap.keys():
             if levelname == 'NOTSET':
                 continue
-            colormap[levelname] =  '%s%s %s%s' % (
+            colormap[levelname] = '%s%s %s%s' % (
                 colormap.get(levelname, '').decode('ascii'),  # to str
                 icomap[levelname],
                 levelname,
@@ -92,9 +92,9 @@ def makefunc(level):
 
 
 # set up logging, custom levels
-logging.addLevelName(logging.NOTE, 'NOTE')      # new levels
+logging.addLevelName(logging.NOTE, 'NOTE')          # new levels
 logging.addLevelName(logging.EXCEPT, 'EXCEPT')
-logging.addLevelName(logging.CRITICAL, 'FATAL') # copy critical to fatal
+logging.addLevelName(logging.CRITICAL, 'FATAL')     # copy critical to fatal
 
 # add convenience funcs
 log.note    = makefunc(logging.NOTE)
@@ -106,11 +106,10 @@ if app.debug:
     console_log.setFormatter(ColorFmtr(DEBUG_TEMPL))
     # third party:
     #~ logging.getLogger('sqlalchemy.engine').setLevel(console_level)
-    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO) # D, too much
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)  # D too much
 else:
     console_level = logging.INFO
     console_log.setFormatter(Formatter(PROD_TEMPL))
 
 log.addHandler(console_log)
 log.setLevel(console_level)
-

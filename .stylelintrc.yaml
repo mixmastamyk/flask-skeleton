@@ -1,0 +1,22 @@
+
+rules:
+
+    block-no-empty: true
+    color-hex-case: lower
+    color-no-invalid-hex: true
+    function-name-case: lower
+    indentation: 4
+    length-zero-no-unit: true
+    max-empty-lines: 2
+    max-line-length: 79
+    no-empty-source: true
+    no-eol-whitespace: true
+    no-extra-semicolons: true
+    string-quotes: single
+    unit-case: lower
+    value-list-comma-space-after: always-single-line
+    value-list-comma-space-before: never
+
+ignoreFiles:
+
+    - fa-min.css

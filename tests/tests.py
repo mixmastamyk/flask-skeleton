@@ -6,8 +6,8 @@ import tempfile
 
 # make app available:
 sys.path.insert(0, os.path.abspath('../main'))
-import main
-from main import app
+import main             # noqa: E402
+from main import app    # noqa: E402
 
 username = 'admin@mydomain.com'
 password = 'needs one!'
@@ -67,4 +67,3 @@ class TestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

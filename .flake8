@@ -1,0 +1,28 @@
+[flake8]
+ignore =
+    E116,
+    E124,
+    E126,
+    E127,
+    E129,
+    E201,
+    E202,
+    E221,
+    E241,
+    E251,
+    E262,
+    E265,
+    E401,
+    E702,
+#~ W391,
+
+exclude =
+    .git,
+    __pycache__,
+    docs/source/conf.py,
+    old,
+    build,
+    dist
+max-complexity = 10
+max-line-length = 82
+format = ${green}%(path)s${reset} ⇒ ${white_bold}%(row)d${reset}:%(col)d${reset}  ${yellow}%(code)s${reset} %(text)s
