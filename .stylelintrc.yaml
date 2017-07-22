@@ -4,18 +4,47 @@ rules:
     block-no-empty: true
     color-hex-case: lower
     color-no-invalid-hex: true
+    comment-no-empty: true
+    comment-whitespace-inside: always
+    declaration-block-no-redundant-longhand-properties: true
+    declaration-block-no-shorthand-property-overrides: true
+    font-family-no-duplicate-names: true
+    function-calc-no-unspaced-operator: true
+    function-comma-space-after: always-single-line
+    #~ function-list-comma-space-before: never
     function-name-case: lower
     indentation: 4
     length-zero-no-unit: true
     max-empty-lines: 2
-    max-line-length: 79
+    max-line-length: 80
+    media-feature-colon-space-after: always
+    media-feature-colon-space-before: never
+    media-feature-name-case: lower
+    media-feature-name-no-unknown: true
+    media-query-list-comma-space-after: always
+    media-query-list-comma-space-before: never
     no-empty-source: true
     no-eol-whitespace: true
     no-extra-semicolons: true
+    property-case: lower
+    property-no-unknown: true
+    selector-list-comma-space-after: always-single-line
+    selector-list-comma-space-before: never
+    selector-pseudo-class-no-unknown: true
+    selector-pseudo-element-no-unknown: true
+    selector-type-no-unknown: true
     string-quotes: single
     unit-case: lower
+    unit-no-unknown: true
     value-list-comma-space-after: always-single-line
     value-list-comma-space-before: never
+    shorthand-property-no-redundant-values: true
+
+
+    declaration-block-no-duplicate-properties:
+        - true
+        - ignore: consecutive-duplicates-with-different-values
+
 
 ignoreFiles:
 
