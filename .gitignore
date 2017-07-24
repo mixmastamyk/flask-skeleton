@@ -101,6 +101,7 @@ ENV/
 # app
 .acbuild/
 *.aci
+*.orig
 app
 manifest
 MANIFEST
