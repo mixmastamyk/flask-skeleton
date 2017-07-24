@@ -29,7 +29,8 @@ migrate = Migrate(app, db)
 
 # additional imports below to avoid circular import issues with app, db, etc.
 from .logcfg import log  # noqa: E402
-from . import database, models, forms, views, admin, utils, errors  # noqa: E402
+from . import (database, models, forms, views, admin, utils,  # noqa: F401,E402
+               errors)
 
 # security package
 user_datastore = SQLAlchemyUserDatastore(db, database.Users, database.Roles)
@@ -70,6 +71,5 @@ app.jinja_options = dict(**app.jinja_options.copy(),
                          lstrip_blocks=True,
                         )
 
-admin, utils, views, errors     # no-op - shut up pyflakes
 atexit.register(on_shutdown)    # still needs a signal handler
 log.info('By your command…')

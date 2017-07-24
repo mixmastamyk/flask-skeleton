@@ -40,6 +40,8 @@ class BaseMixin:
 
 
 class MultiTenantBase(BaseMixin):
+    ''' Common fields and relationships are declared here. '''
+
     @declared_attr
     def org_id(cls):
         return Column(Integer, ForeignKey('orgs.id'), nullable=False)
@@ -55,7 +57,7 @@ class Orgs(BaseMixin, db.Model):
     name = Column(String(64), index=True, nullable=False, unique=True)
     users = db.relationship('Users', lazy='dynamic')
 
-    def __init__(self, name='', desc=''):  # needs to have defaults for admin
+    def __init__(self, name, desc=''):  # needs to have defaults for admin
         self.name = name
         self.desc = desc
 
@@ -156,7 +158,7 @@ def initdb(**kwargs):
         db.session.commit()
 
     except (IntegrityError, InvalidRequestError) as err:
-        log.info('starter objects created already: %s', err)
+        log.warn('starter objects created already? %s', err)
         db.session.rollback()
 
 
@@ -171,9 +173,8 @@ def register_models_with_api(module, api):
         'PATCH',
         'POST',
     ]
-    for class_ in inspect.getmembers(module, inspect.isclass):
-        name, class_ = class_
+    for name, class_ in inspect.getmembers(module, inspect.isclass):
         if issubclass(class_, db.Model):
-            log.info('adding %s', class_.__name__)
+            log.debug('adding %s', class_.__name__)
             api.create_api(class_, methods=default_methods,
                            url_prefix=config.APP_API_PREFIX)

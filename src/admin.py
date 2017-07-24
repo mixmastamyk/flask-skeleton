@@ -57,9 +57,7 @@ class AdminModelView(ModelView):
     }
 
     def is_accessible(self):
-        ''' Prevent administration of models unless an admin.
-            (Better security needed.)
-        '''
+        ''' Prevent administration of models unless an admin. '''
         return current_user.admin
 
 
@@ -71,9 +69,7 @@ class UserView(AdminModelView):
     column_searchable_list = ('name', 'email', 'desc')
     form_create_rules = ('admin', 'email', 'name', 'password2', 'org', 'roles',
                          'timezone2', 'desc')
-
-    form_edit_rules   = ('admin', 'email', 'name', 'password2', 'timezone2',
-                         'org', 'roles', 'desc', 'confirmed_at')
+    form_edit_rules   = form_create_rules + ('confirmed_at',)
 
     # Special password handling:
     # https://github.com/sasaporta/flask-security-admin-example/blob/master/main.py
@@ -92,8 +88,10 @@ class UserView(AdminModelView):
         pass
 
     def on_model_change(self, form, model, is_created):
+        super().on_model_change(form, model, is_created)
+
         data = form.password2.data
-        log.warn('data: %r', data)
+        log.warn('data: %r', data)  # ?
         if data != '':
             model.set_password(data)
         data = form.timezone2.data
@@ -103,13 +101,11 @@ class UserView(AdminModelView):
 
 class OrgView(AdminModelView):
     column_list = ('name', 'updated_at', 'desc')    # order
-    form_create_rules = ('name', 'users', 'desc')
-    form_edit_rules = ('name', 'users', 'desc')
+    form_rules = ('name', 'users', 'desc')
 
 
 class RoleView(AdminModelView):
-    form_create_rules = ('name', 'users', 'org', 'desc')
-    form_edit_rules = ('name', 'users', 'org', 'desc')
+    form_rules = ('name', 'users', 'org', 'desc')
 
 
 log.info('adding admin views.')
