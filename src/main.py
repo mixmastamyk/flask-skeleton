@@ -21,19 +21,27 @@ from .meta import fullname
 app = Flask(__name__)
 app.config.from_object(config)
 app.wsgi_app = ProxyFix(app.wsgi_app)  # remote address header fix
-admin = Admin(app, name=fullname, template_mode='bootstrap3')
+adm = Admin(app, name=fullname, template_mode='bootstrap3')
 db = SQLAlchemy(app)
 mail = Mail(app)
 migrate = Migrate(app, db)
 
 
-# additional imports below to avoid circular import issues with app, db, etc.
+# additional imports to avoid circular import issues w/flask objects.
 from .logcfg import log  # noqa: E402
 from . import models, forms, views, admin, utils, errors  # noqa: F401,E402
+
+# optional modules
 try:
-    import models_app  # application models
+    import models_app  # app models
 except ImportError:
     models_app = None
+
+try:
+    import admin_app  # app config
+except ImportError:
+    admin_app = None
+
 
 # security package
 user_datastore = SQLAlchemyUserDatastore(db, models.Users, models.Roles)

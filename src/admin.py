@@ -10,7 +10,7 @@ from flask_login import current_user
 from wtforms.fields import PasswordField
 #~ from wtforms.validators import Length
 
-from .main import admin, db
+from .main import adm, db
 from .models import Orgs, Roles, Users
 #~ from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
 from .timezones import all_tz
@@ -109,6 +109,6 @@ class RoleView(AdminModelView):
 
 
 log.info('adding admin views.')
-admin.add_view(OrgView(Orgs, db.session))
-admin.add_view(RoleView(Roles, db.session))
-admin.add_view(UserView(Users, db.session))
+adm.add_view(OrgView(Orgs, db.session))
+adm.add_view(RoleView(Roles, db.session))
+adm.add_view(UserView(Users, db.session))
