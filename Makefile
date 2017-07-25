@@ -1,4 +1,8 @@
 
+FLASK_CONFIG := FLASK_DEBUG=1 FLASK_APP=src/main.py
+
+
+
 
 lint:
 
@@ -18,17 +22,17 @@ dropdb:
 
 initdb: dropdb
 
-	FLASK_DEBUG=1 FLASK_APP=src/main.py flask initdb
+	$(FLASK_CONFIG) flask initdb
 
 
 run:
 
-	FLASK_DEBUG=1 FLASK_APP=src/main.py flask run
+	$(FLASK_CONFIG) flask run
 
 
 shell:
 
-	FLASK_DEBUG=1 FLASK_APP=main.py flask shell
+	$(FLASK_CONFIG) flask shell
 
 
 clean:
