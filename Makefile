@@ -26,6 +26,11 @@ run:
 	FLASK_DEBUG=1 FLASK_APP=src/main.py flask run
 
 
+shell:
+
+	FLASK_DEBUG=1 FLASK_APP=main.py flask shell
+
+
 clean:
 	rm -f readme.html
 

@@ -60,6 +60,9 @@ class AdminModelView(ModelView):
         ''' Prevent administration of models unless an admin. '''
         return current_user.admin
 
+    #~ def on_model_change(self, form, model, is_created):
+        #~ ''' Common tasks handled here. '''
+
 
 class UserView(AdminModelView):
     column_labels = dict(name='Nick')
