@@ -11,7 +11,7 @@ from wtforms.fields import PasswordField
 #~ from wtforms.validators import Length
 
 from .main import admin, db
-from .database import Orgs, Roles, Users
+from .models import Orgs, Roles, Users
 #~ from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
 from .timezones import all_tz
 

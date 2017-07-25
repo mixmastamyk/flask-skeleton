@@ -24,7 +24,7 @@ from .config import (UPLOAD_CHUNK_LENGTH, UPLOAD_UNSAVORY_EXTS,
 from .forms import UserForm
 from .logcfg import log
 from .main import app, db
-#~ from .database import Users
+#~ from .models import Users
 from . import utils
 
 

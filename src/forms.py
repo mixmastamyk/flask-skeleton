@@ -11,7 +11,7 @@ from flask_security.forms import (LoginForm, ConfirmRegisterForm,
                                   SendConfirmationForm, ForgotPasswordForm)
 
 from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
-from .database import Users
+from .models import Users
 
 ModelForm = model_form_factory(FlaskForm)
 
