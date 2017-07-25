@@ -41,5 +41,45 @@
         </table>
     </p>
 
+    <p class=pt-3>
+      {% for code in range(100, 104) %}
+        <a class="btn btn-secondary mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+      <span class="text-muted ml-3"><em>(Not usable from browser.)</em></span>
+    </p>
+
+    <p>
+      {% for code in range(200, 209) %}
+        <a class="btn btn-success mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+        <a class="btn btn-success" href="/status/226">226</a>
+    </p>
+
+    <p>
+      {% for code in range(300, 309) %}
+        <a class="btn btn-warning mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+    </p>
+
+    <p>
+      {% for code in range(400, 419) %}
+        <a class="btn btn-danger mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+      {% for code in range(421, 425) %}
+        <a class="btn btn-danger mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+      {% for code in (426, 428, 429, 431, 444, 450, 451) %}
+        <a class="btn btn-danger mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+      {% for code in range(495, 499) %}
+        <a class="btn btn-danger mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+    </p>
+
+    <p>
+      {% for code in range(500, 512) %}
+        <a class="btn btn-danger mb-1" href="/status/{{ code }}">{{ code }}</a>
+      {% endfor %}
+    </p>
     {% include 'links.html' %}
 {% endblock %}
