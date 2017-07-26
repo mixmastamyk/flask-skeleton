@@ -71,9 +71,6 @@ if app.debug:
     # only load toolbar when in debug mode
     from flask_debugtoolbar import DebugToolbarExtension
     toolbar = DebugToolbarExtension(app)
-else:
-    # At startup, before before-first request.  Once with gunicorn --preload.
-    models.initdb()
 
 
 # modify jinja defaults, strip extra whitespace

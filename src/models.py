@@ -136,8 +136,7 @@ class Users(MultiTenantBase, UserMixin, db.Model):
         return '<%s %r>' % (self.__class__.__name__, self.email)
 
 
-@app.cli.command()
-def initdb(**kwargs):
+def initdb_impl(**kwargs):
     ''' Make sure database is ready, and there's an admin user. '''
     from datetime import datetime as dt
     from sqlalchemy.exc import IntegrityError, InvalidRequestError
@@ -158,8 +157,14 @@ def initdb(**kwargs):
         db.session.commit()
 
     except (IntegrityError, InvalidRequestError) as err:
-        log.warn('starter objects created already? %s', err)
+        log.warning('starter objects created already? %s', err)
         db.session.rollback()
+
+
+# click is interfering with unit tests :-/
+@app.cli.command()
+def initdb(**kwargs):
+    initdb_impl(**kwargs)
 
 
 def register_models_with_api(module, api):
