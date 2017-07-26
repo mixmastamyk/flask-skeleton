@@ -21,7 +21,6 @@ from .meta import fullname
 app = Flask(__name__)
 app.config.from_object(config)
 app.wsgi_app = ProxyFix(app.wsgi_app)  # remote address header fix
-adm = Admin(app, name=fullname, template_mode='bootstrap3')
 db = SQLAlchemy(app)
 mail = Mail(app)
 migrate = Migrate(app, db)
@@ -41,6 +40,16 @@ try:
     import admin_app  # app config
 except ImportError:
     admin_app = None
+
+
+# admin setup
+adm = Admin(app, name=fullname, template_mode='bootstrap3',
+            index_view=admin.HomeView(),
+            )
+log.info('adding admin views.')
+admin.register_models_with_admin(models, adm)
+if models_app:
+    admin.register_models_with_admin(models_app, adm)
 
 
 # security package

@@ -7,12 +7,25 @@
         <i class="fa fa-unlock-alt glyphicon glyphicon-list-alt"></i>
     </h2>
 
-    <br/>
-    Links:
+    <style type="text/css">
+        div.links{
+            border: 1px solid #888;
+            border-radius: .3em;
+            display: inline-block;
+            padding: 2em;
+        }
+    </style>
 
-    <ul class="">
-        <li><a href="https://foo.bar/">one</a></li>
-        <li><a href="https://foo.bar/">two</a></li>
-        <li><a href="https://foo.bar/">three</a></li>
-    </ul>
+    <hr/>
+
+    <div class=links>
+        <b>Models:</b>
+
+        <ul class="">
+          {% for model in model_list %}
+            <li><a href="{{ model[0] }}">{{ model[1] }}</a></li>
+          {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
+

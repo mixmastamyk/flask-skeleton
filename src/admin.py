@@ -3,6 +3,7 @@
 '''
 import logging;  log = logging.getLogger(__name__)  # fix
 
+from flask_admin.base import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.form import SecureForm
 from flask_admin.form.fields import Select2Field
@@ -10,10 +11,22 @@ from flask_login import current_user
 from wtforms.fields import PasswordField
 #~ from wtforms.validators import Length
 
-from .main import adm, db
+from .main import db
 from .models import Orgs, Roles, Users
 #~ from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
 from .timezones import all_tz
+
+
+# admin home page view
+class HomeView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        from .main import adm
+        views = []
+        for v in adm._views:
+            views.append((v.url, v.name))
+        log.warn('model links: %s', views)
+        return self.render('admin/index.html', model_list=views)
 
 
 class AdminModelView(ModelView):
@@ -64,7 +77,7 @@ class AdminModelView(ModelView):
         #~ ''' Common tasks handled here. '''
 
 
-class UserView(AdminModelView):
+class UsersAdmin(AdminModelView):
     column_labels = dict(name='Nick')
     column_filters = ('org.name',)
     column_list = ('name', 'email', 'active', 'admin', 'updated_at',
@@ -102,16 +115,32 @@ class UserView(AdminModelView):
             model.timezone = data
 
 
-class OrgView(AdminModelView):
+class OrgsAdmin(AdminModelView):
     column_list = ('name', 'updated_at', 'desc')    # order
     form_rules = ('name', 'users', 'desc')
 
 
-class RoleView(AdminModelView):
+class RolesAdmin(AdminModelView):
     form_rules = ('name', 'users', 'org', 'desc')
 
 
-log.info('adding admin views.')
-adm.add_view(OrgView(Orgs, db.session))
-adm.add_view(RoleView(Roles, db.session))
-adm.add_view(UserView(Users, db.session))
+def register_models_with_admin(model_module, adm):
+    ''' Add all models to the admin site automatically. '''
+    import inspect
+    this_module = globals()
+
+    for name, class_ in inspect.getmembers(model_module, inspect.isclass):
+        if issubclass(class_, db.Model):
+            log.debug('adding %s to Admin', class_.__name__)
+            try:
+                adm_class = this_module[class_.__name__ + 'Admin']
+            except KeyError as err:
+                log.error('Admin class not found: %s', err)
+            adm.add_view(adm_class(class_, db.session))
+
+
+#~ log.info('adding admin views.')
+#~ register_models_with_admin(models_app)
+#~ adm.add_view(OrgView(Orgs, db.session))
+#~ adm.add_view(RoleView(Roles, db.session))
+#~ adm.add_view(UserView(Users, db.session))
