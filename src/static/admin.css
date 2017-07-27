@@ -1,4 +1,7 @@
 
+body {
+    font-size: 2rem;  /* too small! */
+}
 
 nav { border-radius: 0 !important; }
 nav form#logout {

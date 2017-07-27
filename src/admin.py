@@ -22,11 +22,13 @@ class HomeView(AdminIndexView):
     @expose('/')
     def index(self):
         from .main import adm
-        views = []
-        for v in adm._views:
-            views.append((v.url, v.name))
-        log.warn('model links: %s', views)
-        return self.render('admin/index.html', model_list=views)
+        #~ views = []
+        #~ for v in adm._views:
+            #~ views.append((v.url, v.name))
+        #~ log.warn('model links: %s', views)
+        #~ return self.render('admin/index.html', model_list=views)
+        return self.render('admin/index.html', views=adm._views,
+                           hasattr=hasattr)
 
 
 class AdminModelView(ModelView):
@@ -78,6 +80,7 @@ class AdminModelView(ModelView):
 
 
 class UsersAdmin(AdminModelView):
+    icon = dict(gi='user', fa='user')
     column_labels = dict(name='Nick')
     column_filters = ('org.name',)
     column_list = ('name', 'email', 'active', 'admin', 'updated_at',
@@ -116,11 +119,13 @@ class UsersAdmin(AdminModelView):
 
 
 class OrgsAdmin(AdminModelView):
+    icon = dict(gi='briefcase', fa='group')
     column_list = ('name', 'updated_at', 'desc')    # order
     form_rules = ('name', 'users', 'desc')
 
 
 class RolesAdmin(AdminModelView):
+    icon = dict(gi='briefcase', fa='briefcase')
     form_rules = ('name', 'users', 'org', 'desc')
 
 

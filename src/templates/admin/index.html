@@ -4,7 +4,7 @@
     <h2>
         <i class="fa fa-unlock-alt glyphicon glyphicon-home"></i>
         Admin Panel
-        <i class="fa fa-unlock-alt glyphicon glyphicon-list-alt"></i>
+        <!i class="fa fa-unlock-alt glyphicon glyphicon-list-alt"></i>
     </h2>
 
     <style type="text/css">
@@ -14,16 +14,27 @@
             display: inline-block;
             padding: 2em;
         }
+        ul.models {
+            padding-left: 0;
+        }
     </style>
 
     <hr/>
 
     <div class=links>
-        <b>Models:</b>
+        <p><b>Models:</b></p>
 
-        <ul class="">
-          {% for model in model_list %}
-            <li><a href="{{ model[0] }}">{{ model[1] }}</a></li>
+        <ul class="models list-unstyled">
+          {% for view in views %}
+            <li>
+              {% if hasattr(view, 'icon') %}
+                <i class="fa fa-{{ view.icon.fa }} glyphicon glyphicon-{{ view.icon.gi }}"></i>
+              {% elif view.name == 'Home' %}
+                <i class="fa fa-home glyphicon glyphicon-home"></i>
+              {% else %}
+                <i class="fa fa-th-list glyphicon glyphicon-list"></i>
+              {% endif %}
+                <a href="{{ view.url }}">{{ view.name }}</a></li>
           {% endfor %}
         </ul>
     </div>
