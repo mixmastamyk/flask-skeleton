@@ -17,6 +17,9 @@
         ul.models {
             padding-left: 0;
         }
+        .pr-2 {
+            padding-right: .4em;
+        }
     </style>
 
     <hr/>
@@ -28,13 +31,14 @@
           {% for view in views %}
             <li>
               {% if hasattr(view, 'icon') %}
-                <i class="fa fa-{{ view.icon.fa }} glyphicon glyphicon-{{ view.icon.gi }}"></i>
+                <i class="fa fa-{{ view.icon.fa }} glyphicon glyphicon-{{ view.icon.gi }} pr-2"></i>
               {% elif view.name == 'Home' %}
-                <i class="fa fa-home glyphicon glyphicon-home"></i>
+                <i class="fa fa-home glyphicon glyphicon-home pr-2"></i>
               {% else %}
-                <i class="fa fa-th-list glyphicon glyphicon-list"></i>
+                <i class="fa fa-th-list glyphicon glyphicon-list pr-2"></i>
               {% endif %}
-                <a href="{{ view.url }}">{{ view.name }}</a></li>
+                <a href="{{ view.url }}">{{ view.name }}</a>
+            </li>
           {% endfor %}
         </ul>
     </div>
