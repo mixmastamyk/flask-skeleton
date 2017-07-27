@@ -23,11 +23,6 @@ class HomeView(AdminIndexView):
     @expose('/')
     def index(self):
         from .main import adm
-        #~ views = []
-        #~ for v in adm._views:
-            #~ views.append((v.url, v.name))
-        #~ log.warn('model links: %s', views)
-        #~ return self.render('admin/index.html', model_list=views)
         return self.render('admin/index.html', views=adm._views,
                            hasattr=hasattr)
 
@@ -138,7 +133,7 @@ def register_models_with_admin(adm, model_module,
 
     for name, class_ in inspect.getmembers(model_module, inspect.isclass):
         if issubclass(class_, db.Model):
-            log.debug('adding %s to Admin', class_.__name__)
+            log.debug('adding %s', class_.__name__)
             try:
                 admin_class = getattr(admin_module, class_.__name__ + 'Admin')
             except KeyError as err:
