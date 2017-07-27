@@ -16,6 +16,21 @@ class CustomJSONEncoder(JSONEncoder):
 app.json_encoder = CustomJSONEncoder
 
 
+class ansi:
+    ''' Colored text in logs. '''
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    GREEN = '\033[92m'
+    PURPLE = '\033[95m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+
+    BOLD = '\033[1m'
+    END = '\033[0m'
+    UNDERLINE = '\033[4m'
+
+
 def get_status_category(status_code):
     ''' Returns the category from a given HTTP status code. '''
     if 100 <= status_code < 200:
