@@ -20,10 +20,11 @@ APP_DEFAULT_ADMIN_USER = dict(name='admin', email='admin@mydomain.com',
                               desc='Real men of genius')
 APP_DEFAULT_ORG = dict(name='MyCompany, Inc.', desc='A big eastern syndicate')
 APP_DEFAULT_ROLE = dict(name='end-user', desc='Run of the mill user.')
-APP_MIN_PASSWD_LENGTH = 8
-APP_SECURITY_PREFIX = '/security'
 APP_FULLNAME = fullname
+APP_MAX_PLAYLIST_LEN = 40
+APP_MIN_PASSWD_LENGTH = 8
 APP_ORGNAME = orgname
+APP_SECURITY_PREFIX = '/security'
 
 UPLOAD_CHUNK_LENGTH = 8 * _1MB
 UPLOADED_FILES_DEST = '/tmp'
