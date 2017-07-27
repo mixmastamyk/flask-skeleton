@@ -136,7 +136,7 @@ def register_models_with_admin(adm, model_module,
             log.debug('adding %s', class_.__name__)
             try:
                 admin_class = getattr(admin_module, class_.__name__ + 'Admin')
-            except KeyError as err:
+            except AttributeError as err:
                 log.error('Admin class not found: %s', err)
             else:
                 adm.add_view(admin_class(class_, db.session))
