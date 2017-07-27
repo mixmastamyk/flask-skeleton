@@ -47,9 +47,9 @@ adm = Admin(app, name=fullname, template_mode='bootstrap3',
             index_view=admin.HomeView(),
             )
 log.info('adding admin views.')
-admin.register_models_with_admin(models, adm)
-if models_app:
-    admin.register_models_with_admin(models_app, adm)
+admin.register_models_with_admin(adm, models)
+if models_app and admin_app:
+    admin.register_models_with_admin(adm, models_app, admin_module=admin_app)
 
 
 # security package
