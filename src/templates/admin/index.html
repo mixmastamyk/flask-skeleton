@@ -3,44 +3,38 @@
 {% block body %}
     <h2>
         <i class="fa fa-unlock-alt glyphicon glyphicon-home"></i>
-        Admin Panel
-        <!i class="fa fa-unlock-alt glyphicon glyphicon-list-alt"></i>
+        Admin Dashboard
     </h2>
+    <hr class="mb-5"/>
 
-    <style type="text/css">
-        div.links{
-            border: 1px solid #888;
-            border-radius: .3em;
-            display: inline-block;
-            padding: 2em;
-        }
-        ul.models {
-            padding-left: 0;
-        }
-        .pr-2 {
-            padding-right: .4em;
-        }
-    </style>
+    <div class="row">
+        <div class="col-md-3">
 
-    <hr/>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Models</h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="models list-unstyled">
+                      {% for view in views %}
+                        <li>
+                          {% if hasattr(view, 'icon') %}
+                            <i class="fa fa-{{ view.icon.fa }} glyphicon glyphicon-{{ view.icon.gi }} pr-2"></i>
+                          {% elif view.name == 'Home' %}
+                            <i class="fa fa-home glyphicon glyphicon-home pr-2"></i>
+                          {% else %}
+                            <i class="fa fa-th-list glyphicon glyphicon-list pr-2"></i>
+                          {% endif %}
+                            <a href="{{ view.url }}">{{ view.name }}</a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-    <div class=links>
-        <p><b>Models:</b></p>
-
-        <ul class="models list-unstyled">
-          {% for view in views %}
-            <li>
-              {% if hasattr(view, 'icon') %}
-                <i class="fa fa-{{ view.icon.fa }} glyphicon glyphicon-{{ view.icon.gi }} pr-2"></i>
-              {% elif view.name == 'Home' %}
-                <i class="fa fa-home glyphicon glyphicon-home pr-2"></i>
-              {% else %}
-                <i class="fa fa-th-list glyphicon glyphicon-list pr-2"></i>
-              {% endif %}
-                <a href="{{ view.url }}">{{ view.name }}</a>
-            </li>
-          {% endfor %}
-        </ul>
+        </div>
+        <div class="col-md-5"><!-- placehoder --></div>
+        <div class="col-md-4"><!-- placehoder --></div>
     </div>
-{% endblock %}
 
+{% endblock %}

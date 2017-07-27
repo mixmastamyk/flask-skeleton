@@ -46,3 +46,36 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
 }
 
 /* Tone down white backgrounds, end */
+
+/* Dashboard */
+.panel {
+    background-color: #e8e8e8;
+    opacity: .8;
+}
+.panel ul li {
+    display: flex;
+    font-size: 1.6em;
+    padding-left: .2em;
+}
+.panel ul li:hover {
+    background-color: white;
+}
+.panel ul a {
+    flex-grow: 1;
+    text-decoration: none;
+}
+.panel ul .fa {
+    padding-top: .1em;
+}
+@supports (-moz-transform: translate(0, 0)) {  /* firefox issue */
+    .panel ul .fa {
+        padding-top: .2em;
+    }
+}
+/* TODO: duplicate bootstrap 4 classes: */
+.pr-2 {
+    padding-right: .4em;
+}
+.mb-5 {
+    margin-bottom: 2em;
+}
