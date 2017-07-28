@@ -30,6 +30,10 @@ migrate = Migrate(app, db)
 from .logcfg import log  # noqa: E402
 from . import models, forms, views, admin, utils, errors  # noqa: F401,E402
 
+# admin setup
+adm = Admin(app, name=fullname, template_mode='bootstrap3',
+            index_view=admin.HomeView(),
+            )
 # optional modules
 try:
     import models_app  # app models
@@ -41,15 +45,11 @@ try:
 except ImportError:
     admin_app = None
 
-
-# admin setup
-adm = Admin(app, name=fullname, template_mode='bootstrap3',
-            index_view=admin.HomeView(),
-            )
 log.info('adding admin views.')
-admin.register_models_with_admin(adm, models)
+admin.configure_menu_links(adm)
+admin.register_models_with_admin(models)
 if models_app and admin_app:
-    admin.register_models_with_admin(adm, models_app, admin_module=admin_app)
+    admin.register_models_with_admin(models_app, admin_module=admin_app)
 
 
 # security package

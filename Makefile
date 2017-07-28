@@ -13,7 +13,7 @@ initdb: dropdb
 
 
 lint:
-
+	@printf "\033c"
 	eslint --color src/static/
 
 	#~ stylelint --color --ignore-path /media/Data/repos/iris/skeleton/src/static/fa-min.css src/static/*.css

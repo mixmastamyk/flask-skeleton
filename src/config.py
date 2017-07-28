@@ -5,7 +5,7 @@ import sys  #, os
 from os.path import abspath, dirname, join
 from datetime import timedelta
 
-from .meta import orgname, fullname
+from .meta import appname, orgname, fullname
 
 basedir = abspath(dirname(__file__))
 _1MB = 1000000
@@ -21,10 +21,16 @@ APP_DEFAULT_ADMIN_USER = dict(name='admin', email='admin@mydomain.com',
 APP_DEFAULT_ORG = dict(name='MyCompany, Inc.', desc='A big eastern syndicate')
 APP_DEFAULT_ROLE = dict(name='end-user', desc='Run of the mill user.')
 APP_FULLNAME = fullname
+APP_MENU_LINKS = (
+    dict(name=appname + ' Home', category='Links', url='http://..'),
+    dict(name='Google', category='Links', url='http://www.google.com/'),
+    dict(name='Mozilla', category='Links', url='http://mozilla.org/'),
+)
 APP_MAX_PLAYLIST_LEN = 40
 APP_MIN_PASSWD_LENGTH = 8
 APP_ORGNAME = orgname
 APP_SECURITY_PREFIX = '/security'
+
 
 UPLOAD_CHUNK_LENGTH = 8 * _1MB
 UPLOADED_FILES_DEST = '/tmp'

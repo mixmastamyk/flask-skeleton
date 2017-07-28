@@ -125,10 +125,11 @@ class RolesAdmin(AdminModelView):
     form_rules = ('name', 'users', 'org', 'desc')
 
 
-def register_models_with_admin(adm, model_module,
+def register_models_with_admin(model_module,
                                admin_module=sys.modules[__name__]):
     ''' Add all models to the admin site automatically. '''
     import inspect
+    from .main import adm
     log.info('adding admin views.')
 
     for name, class_ in inspect.getmembers(model_module, inspect.isclass):
@@ -140,3 +141,12 @@ def register_models_with_admin(adm, model_module,
                 log.error('Admin class not found: %s', err)
             else:
                 adm.add_view(admin_class(class_, db.session))
+
+
+def configure_menu_links(adm):
+    ''' Add links to the admin menu bar. '''
+    from flask_admin.menu import MenuLink
+    from .config import APP_MENU_LINKS
+
+    for link_args in APP_MENU_LINKS:
+        adm.add_link(MenuLink(**link_args))
