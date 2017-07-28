@@ -23,8 +23,8 @@ APP_DEFAULT_ROLE = dict(name='end-user', desc='Run of the mill user.')
 APP_FULLNAME = fullname
 APP_MENU_LINKS = (
     dict(name=appname + ' Home', category='Links', url='http://..'),
-    dict(name='Google', category='Links', url='http://www.google.com/'),
-    dict(name='Mozilla', category='Links', url='http://mozilla.org/'),
+    dict(name='Menu editable', category='Links', url='http://www.google.com/'),
+    dict(name='in config.py', category='Links', url='http://mozilla.org/'),
 )
 APP_MAX_PLAYLIST_LEN = 40
 APP_MIN_PASSWD_LENGTH = 8

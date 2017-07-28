@@ -3,6 +3,9 @@
 '''
 import os
 
+from src.meta import appname
+
+
 APP_DEFAULT_ADMIN_USER = dict(
                             email='admin@iris.digital',
                             desc='Real men of genius.',
@@ -12,6 +15,11 @@ APP_DEFAULT_ADMIN_USER = dict(
 )
 APP_DEFAULT_ROLE = dict(name='VIP', desc='Very Impatient Person')
 APP_DEFAULT_ORG = dict(name='BES, Inc.', desc='A big eastern syndicate')
+APP_MENU_LINKS = (
+    dict(name=appname + ' Home', category='Links', url='http://..'),
+    dict(name='Google', category='Links', url='http://www.google.com/'),
+    dict(name='Mozilla', category='Links', url='http://mozilla.org/'),
+)
 
 
 MAIL_SERVER = 'localhost'
