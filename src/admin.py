@@ -18,6 +18,14 @@ from .models import Orgs, Roles, Users  # noqa: F401  # they are used
 from .timezones import all_tz
 
 
+# menu icons
+category_icon_classes = dict(
+    People='glyphicon glyphicon-briefcase',  # group n/a :-(
+    App='glyphicon glyphicon-list',
+    Network='glyphicon glyphicon-cloud',
+)
+
+
 # admin home page view
 class HomeView(AdminIndexView):
     @expose('/')
@@ -141,8 +149,17 @@ def register_models_with_admin(model_module, category=None,
             except AttributeError as err:
                 log.error('Admin class not found: %s', err)
             else:
+                category = getattr(admin_class, 'category', category)
+                iconargs = {}
+                if getattr(admin_class, 'icon'):
+                    iconargs = dict(menu_icon_type='glyph',
+                                    menu_icon_value='glyphicon-' +
+                                                admin_class.icon.get('gi', ''))
+
                 adm.add_view(admin_class(class_, db.session,
                                          category=category,
+                                         menu_class_name=None,
+                                         **iconargs,
                 ))
 
 

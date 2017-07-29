@@ -33,6 +33,7 @@ from . import models, forms, views, admin, utils, errors  # noqa: F401,E402
 # admin setup
 adm = Admin(app, name=fullname, template_mode='bootstrap3',
             index_view=admin.HomeView(),
+            category_icon_classes=admin.category_icon_classes,
             )
 # optional modules
 try:
@@ -47,7 +48,7 @@ except ImportError:
 
 log.info('adding admin views.')
 admin.configure_menu_links(adm)
-admin.register_models_with_admin(models)
+admin.register_models_with_admin(models, category='People')
 if models_app and admin_app:
     admin.register_models_with_admin(models_app, admin_module=admin_app)
 
