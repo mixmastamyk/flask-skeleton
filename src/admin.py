@@ -85,7 +85,7 @@ class AdminModelView(ModelView):
 
 
 class UsersAdmin(AdminModelView):
-    icon = dict(gi='user', fa='user')
+    _icon = dict(gi='user', fa='user')
     column_labels = dict(name='Nick')
     column_list = ('name', 'email', 'active', 'admin', 'updated_at',
                    'login_count', 'desc')  # order
@@ -123,14 +123,14 @@ class UsersAdmin(AdminModelView):
 
 
 class OrgsAdmin(AdminModelView):
-    icon = dict(gi='briefcase', fa='group')
+    _icon = dict(gi='briefcase', fa='group')
     column_filters = ('deleted',)  # remove org.name
     column_list = ('name', 'updated_at', 'desc')    # order
     form_rules = ('name', 'users', 'desc')
 
 
 class RolesAdmin(AdminModelView):
-    icon = dict(gi='briefcase', fa='briefcase')
+    _icon = dict(gi='briefcase', fa='briefcase')
     form_rules = ('name', 'users', 'org', 'desc')
 
 
@@ -147,14 +147,15 @@ def register_models_with_admin(model_module, category=None,
             try:
                 admin_class = getattr(admin_module, class_.__name__ + 'Admin')
             except AttributeError as err:
-                log.error('Admin class not found: %s', err)
+                name = str(err).split("'")[-2:][0]  # slice avoids IndexError:
+                log.warn('Admin class not found: %s', name)
             else:
-                category = getattr(admin_class, 'category', category)
+                category = getattr(admin_class, '_category', category)
                 iconargs = {}
-                if getattr(admin_class, 'icon'):
+                if getattr(admin_class, '_icon', None):
                     iconargs = dict(menu_icon_type='glyph',
                                     menu_icon_value='glyphicon-' +
-                                                admin_class.icon.get('gi', ''))
+                                              admin_class._icon.get('gi', ''))
 
                 adm.add_view(admin_class(class_, db.session,
                                          category=category,

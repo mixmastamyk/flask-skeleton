@@ -18,15 +18,19 @@
                     <ul class="models list-unstyled">
                       {% for view in views %}
                         <li>
-                          {% if hasattr(view, 'icon') %}
-                            <i class="fa fa-{{ view.icon.fa }} glyphicon glyphicon-{{ view.icon.gi }} pr-2"></i>
+                          {% if hasattr(view, '_icon') %}
+                            <i class="fa fa-{{ view._icon.fa }} glyphicon glyphicon-{{ view._icon.gi }} pr-2"></i>
                           {% elif view.name == 'Home' %}
                             <i class="fa fa-home glyphicon glyphicon-home pr-2"></i>
-                          {% else %}
-                            <i class="fa fa-th-list glyphicon glyphicon-list pr-2"></i>
-                          {% endif %}
+                           {% endif %}
                             <a href="{{ view.url }}">{{ view.name }}</a>
                         </li>
+                      {% if view.name == 'Users' %} {# break list and work around css limits #}
+                        </ul>
+                        <hr/>
+                        <ul class="models list-unstyled">
+                      {% endif %}
+
                       {% endfor %}
                     </ul>
                 </div>
