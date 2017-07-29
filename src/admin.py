@@ -142,7 +142,7 @@ def register_models_with_admin(model_module, category=None,
                 log.error('Admin class not found: %s', err)
             else:
                 adm.add_view(admin_class(class_, db.session,
-                                         category=None,
+                                         category=category,
                 ))
 
 
