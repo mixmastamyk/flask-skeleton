@@ -31,6 +31,8 @@ class BaseMixin:
     created_at = Column(DateTime, server_default=db.func.current_timestamp())
     updated_at = Column(DateTime, server_default=db.func.current_timestamp(),
                                   server_onupdate=db.func.current_timestamp())
+    deleted = Column(Boolean, nullable=True)
+    deleted_at = Column(DateTime, nullable=True)
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.name)

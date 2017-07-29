@@ -44,6 +44,7 @@ class AdminModelView(ModelView):
         'last_login_ip',
         'password',
     )
+    column_filters = ('org.name', 'deleted')
     column_labels = dict(desc='Description')            # full word for display
     column_list = ('name', 'org', 'updated_at', 'desc')    # order
     column_searchable_list = ('name', 'desc')
@@ -78,7 +79,6 @@ class AdminModelView(ModelView):
 class UsersAdmin(AdminModelView):
     icon = dict(gi='user', fa='user')
     column_labels = dict(name='Nick')
-    column_filters = ('org.name',)
     column_list = ('name', 'email', 'active', 'admin', 'updated_at',
                    'login_count', 'desc')  # order
     column_searchable_list = ('name', 'email', 'desc')
@@ -93,7 +93,7 @@ class UsersAdmin(AdminModelView):
     # than a regular text field.
     form_extra_fields = {
         'password2': PasswordField('New Password',),  # [Length(MIN_LEN)]
-        'timezone2': Select2Field('Timezone (write only)', choices=all_tz, ),
+        'timezone2': Select2Field('Timezone (write only)', choices=all_tz),
     }
 
     def on_form_prefill(self, form, id):  # doesn't work
@@ -116,6 +116,7 @@ class UsersAdmin(AdminModelView):
 
 class OrgsAdmin(AdminModelView):
     icon = dict(gi='briefcase', fa='group')
+    column_filters = ('deleted',)  # remove org.name
     column_list = ('name', 'updated_at', 'desc')    # order
     form_rules = ('name', 'users', 'desc')
 
@@ -125,7 +126,7 @@ class RolesAdmin(AdminModelView):
     form_rules = ('name', 'users', 'org', 'desc')
 
 
-def register_models_with_admin(model_module,
+def register_models_with_admin(model_module, category=None,
                                admin_module=sys.modules[__name__]):
     ''' Add all models to the admin site automatically. '''
     import inspect
@@ -140,7 +141,9 @@ def register_models_with_admin(model_module,
             except AttributeError as err:
                 log.error('Admin class not found: %s', err)
             else:
-                adm.add_view(admin_class(class_, db.session))
+                adm.add_view(admin_class(class_, db.session,
+                                         category=None,
+                ))
 
 
 def configure_menu_links(adm):
@@ -150,3 +153,7 @@ def configure_menu_links(adm):
 
     for link_args in APP_MENU_LINKS:
         adm.add_link(MenuLink(**link_args))
+
+
+# manual registration
+#~ adm.add_view(ThingAdmin(Thing, db.session))
