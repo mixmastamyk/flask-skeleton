@@ -2,8 +2,8 @@
 
 {% block body %}
     <h2>
-        <i class="fa fa-unlock-alt glyphicon glyphicon-home"></i>
-        Admin Dashboard
+        <i class="fa fa-home glyphicon glyphicon-home"></i>
+        Dashboard
     </h2>
     <hr class="mb-5"/>
 
@@ -12,27 +12,32 @@
 
             <div class="panel panel-primary">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Models</h3>
+                    <h3 class="panel-title">
+                        <i class="fa fa-list-alt glyphicon glyphicon-list-alt"></i>
+                        Models
+                    </h3>
                 </div>
                 <div class="panel-body">
+
+                  {% for cat, viewlist in cats %}
+                    {% if cat %}
+                    <h3 class=text-muted>{{ cat }}</h3>
+                    {% endif %}
                     <ul class="models list-unstyled">
-                      {% for view in views %}
-                        <li>
+
+                    {% for view in viewlist %}
+                        <li {% if not cat %}style="padding-left: .1em"{% endif %}>
                           {% if hasattr(view, '_icon') %}
                             <i class="fa fa-{{ view._icon.fa }} glyphicon glyphicon-{{ view._icon.gi }} pr-2"></i>
                           {% elif view.name == 'Home' %}
                             <i class="fa fa-home glyphicon glyphicon-home pr-2"></i>
-                           {% endif %}
+                          {% endif %}
                             <a href="{{ view.url }}">{{ view.name }}</a>
                         </li>
-                      {% if view.name == 'Users' %} {# break list and work around css limits #}
-                        </ul>
-                        <hr/>
-                        <ul class="models list-unstyled">
-                      {% endif %}
+                    {% endfor %}
 
-                      {% endfor %}
                     </ul>
+                  {% endfor %}
                 </div>
             </div>
 

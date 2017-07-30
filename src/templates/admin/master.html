@@ -14,8 +14,8 @@
                         Logout</a>
                 </form>
 
-                <div class="navbar-text navbar-right">
-                    {{ current_user.email }}
+                <div class="navbar-text navbar-right hidden-md">
+                    <small>{{ current_user.email }}</small>
                 </div>
 {% endblock %}
 

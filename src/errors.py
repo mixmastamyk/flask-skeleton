@@ -4,6 +4,7 @@
 import werkzeug.exceptions
 
 from .main import app
+#~ from .logcfg import log
 
 
 @app.errorhandler(werkzeug.exceptions.BadRequest)

@@ -2,6 +2,7 @@
     Configure the Administration app.
 '''
 import sys
+from collections import defaultdict
 
 from flask_admin.base import AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
@@ -31,12 +32,27 @@ class HomeView(AdminIndexView):
     @expose('/')
     def index(self):
         from .main import adm
-        return self.render('admin/index.html', views=adm._views,
-                           hasattr=hasattr)
+
+        # divide into buckets
+        cats = defaultdict(list)  # each category holds a list
+        for view in adm._views:
+            catname = getattr(view, '_category', '')
+            cats[catname].append(view)
+        # sort
+        sortedcats = []
+        sortedcats.append( ('', cats.pop('', [])) )               # first, home
+        sortedcats.append( ('People', cats.pop('People', [])) )   # then peeps
+        for catname in sorted(cats):            # add remaining app categories
+            sortedcats.append( (catname, cats[catname]) )
+        log.debug('admin home view categories:\n%s', sortedcats)
+
+        return self.render('admin/index.html',
+                            cats=sortedcats, hasattr=hasattr)
 
 
 class AdminModelView(ModelView):
     ''' Customize admin default behavior. '''
+    _category = ''
     page_size = 50                  # num entries to display on the list view
     can_export = True
     can_view_details = True
@@ -85,6 +101,7 @@ class AdminModelView(ModelView):
 
 
 class UsersAdmin(AdminModelView):
+    _category = 'People'
     _icon = dict(gi='user', fa='user')
     column_labels = dict(name='Nick')
     column_list = ('name', 'email', 'active', 'admin', 'updated_at',
@@ -123,6 +140,7 @@ class UsersAdmin(AdminModelView):
 
 
 class OrgsAdmin(AdminModelView):
+    _category = 'People'
     _icon = dict(gi='briefcase', fa='group')
     column_filters = ('deleted',)  # remove org.name
     column_list = ('name', 'updated_at', 'desc')    # order
@@ -130,6 +148,7 @@ class OrgsAdmin(AdminModelView):
 
 
 class RolesAdmin(AdminModelView):
+    _category = 'People'
     _icon = dict(gi='briefcase', fa='briefcase')
     form_rules = ('name', 'users', 'org', 'desc')
 
@@ -149,7 +168,7 @@ def register_models_with_admin(model_module, category=None,
             except AttributeError as err:
                 name = str(err).split("'")[-2:][0]  # slice avoids IndexError:
                 log.warn('Admin class not found: %s', name)
-            else:
+            else:  # each class can override its category
                 category = getattr(admin_class, '_category', category)
                 iconargs = {}
                 if getattr(admin_class, '_icon', None):

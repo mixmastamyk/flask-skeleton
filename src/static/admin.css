@@ -53,8 +53,8 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
 }
 .panel ul li {
     display: flex;
-    font-size: 1.6em;
-    padding-left: .2em;
+    font-size: 1.2em;
+    padding-left: .6em;
 }
 .panel ul li:hover {
     background-color: white;
@@ -71,6 +71,13 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
         padding-top: .2em;
     }
 }
+.panel hr {
+    margin: .6em 0;
+    border-top: 1px dotted #888;
+    width: 96%;
+}
+
+
 /* TODO: duplicate bootstrap 4 classes: */
 .pr-2 {
     padding-right: .4em;

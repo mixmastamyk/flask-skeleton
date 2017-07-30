@@ -37,18 +37,20 @@ adm = Admin(app, name=fullname, template_mode='bootstrap3',
             )
 # optional modules
 try:
-    import models_app  # app models
-except ImportError:
+    from . import models_app  # app models
+except ImportError as err:
+    log.debug('%s: %s', err.__class__.__name__, err)
     models_app = None
 
 try:
-    import admin_app  # app config
-except ImportError:
+    from . import admin_app  # app config
+except ImportError as err:
+    log.debug('%s: %s', err.__class__.__name__, err)
     admin_app = None
 
 log.info('adding admin views.')
 admin.configure_menu_links(adm)
-admin.register_models_with_admin(models, category='People')
+admin.register_models_with_admin(models)
 if models_app and admin_app:
     admin.register_models_with_admin(models_app, admin_module=admin_app)
 
