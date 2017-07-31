@@ -2,14 +2,13 @@
 
 {% block body %}
     <h2>
-        <i class="fa fa-home glyphicon glyphicon-home"></i>
-        Dashboard
+        <i class="fa fa-home glyphicon glyphicon-dashboard"></i>
+        Admin Dashboard
     </h2>
     <hr class="mb-5"/>
 
     <div class="row">
         <div class="col-md-3">
-
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">
@@ -21,7 +20,7 @@
 
                   {% for cat, viewlist in cats %}
                     {% if cat %}
-                    <h3 class=text-muted>{{ cat }}</h3>
+                    <span class=text-muted>{{ cat }}</span>
                     {% endif %}
                     <ul class="models list-unstyled">
 
@@ -40,10 +39,48 @@
                   {% endfor %}
                 </div>
             </div>
-
         </div>
-        <div class="col-md-5"><!-- placehoder --></div>
-        <div class="col-md-4"><!-- placehoder --></div>
+
+        <div class="col-md-9">
+            <div class="row">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <i class="fa fa-list-alt glyphicon glyphicon-stats"></i>
+                            Stats
+                        </h3>
+                    </div>
+                    <div class="panel-body d-flex">
+                        <table class="table table-hover table-condensed adm-stats">
+                            <caption>People</caption>
+                          {% for stat in countstats %}
+                            <tr>
+                                <td>{{ stat[0] }}:</td>
+                                <td>{{ stat[1] }}</td>
+                            </tr>
+                          {% endfor %}
+                        </table>
+                        {% block more_stats %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <i class="fa fa-list-alt glyphicon glyphicon-fire"></i>
+                            Recent Activity
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        - (Placeholder)<br>
+                        - (Placeholder)<br>
+                        - (Placeholder)<br>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 {% endblock %}

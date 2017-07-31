@@ -47,13 +47,15 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
 /* Tone down white backgrounds, end */
 
 /* Dashboard */
+.fa {
+    opacity: .8;
+}
 .panel {
     background-color: #e8e8e8;
     opacity: .8;
 }
 .panel ul li {
     display: flex;
-    font-size: 1.2em;
     padding-left: .6em;
 }
 .panel ul li:hover {
@@ -66,7 +68,7 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
 .panel ul .fa {
     padding-top: .1em;
 }
-@supports (-moz-transform: translate(0, 0)) {  /* firefox issue */
+@supports (-moz-transform: translate(0, 0)) {  /* fix: firefox issue */
     .panel ul .fa {
         padding-top: .2em;
     }
@@ -76,6 +78,17 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
     border-top: 1px dotted #888;
     width: 96%;
 }
+/* adm tables */
+table.adm-stats {
+    width: 28%;
+    table-layout: fixed;
+    margin-right: 2em;
+    margin-bottom: 0;
+}
+table.adm-stats tr td/*:first-child*/ {
+    text-align: right;
+    width: 50%;
+}
 
 
 /* TODO: duplicate bootstrap 4 classes: */
@@ -84,4 +97,7 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
 }
 .mb-5 {
     margin-bottom: 2em;
+}
+.d-flex {
+    display: flex;
 }

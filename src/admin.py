@@ -46,7 +46,12 @@ class HomeView(AdminIndexView):
             sortedcats.append( (catname, cats[catname]) )
         log.debug('admin home view categories:\n%s', sortedcats)
 
-        return self.render('admin/index.html',
+        countstats = (
+            ('Orgs', Orgs.query.filter_by(deleted=None).count()),
+            ('Users', Users.query.filter_by(deleted=None).count()),
+            ('Roles', Roles.query.filter_by(deleted=None).count()),
+        )
+        return self.render('admin/index.html', countstats=countstats,
                             cats=sortedcats, hasattr=hasattr)
 
 
