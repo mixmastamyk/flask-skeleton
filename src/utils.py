@@ -1,8 +1,11 @@
+from os.path import exists, join
+
 from flask.json import JSONEncoder
 from ipaddress import _BaseAddress
 from pytz.tzinfo import DstTzInfo
 
 from .main import app
+from .logcfg import log
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -47,3 +50,12 @@ def get_status_category(status_code):
         cat = 'invalid'
 
     return cat
+
+
+def first_of(*paths, root='src/templates'):
+    ''' return first existing path. '''
+    for path in paths:
+        test_path = join(root, path)
+        log.debug('looking for template at: %r', test_path)
+        if exists(test_path):
+            return path

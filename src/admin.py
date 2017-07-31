@@ -17,6 +17,7 @@ from .main import db
 from .models import Orgs, Roles, Users  # noqa: F401  # they are used
 #~ from .config import APP_MIN_PASSWD_LENGTH as MIN_LEN
 from .timezones import all_tz
+from .utils import first_of
 
 
 # menu icons
@@ -51,8 +52,9 @@ class HomeView(AdminIndexView):
             ('Users', Users.query.filter_by(deleted=None).count()),
             ('Roles', Roles.query.filter_by(deleted=None).count()),
         )
-        return self.render('admin/index.html', countstats=countstats,
-                            cats=sortedcats, hasattr=hasattr)
+        return self.render(first_of('admin/index_app.html', 'admin/index.html'),
+                           countstats=countstats,
+                           cats=sortedcats, hasattr=hasattr)
 
 
 class AdminModelView(ModelView):
