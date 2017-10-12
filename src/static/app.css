@@ -29,6 +29,7 @@ hr {
 
 img.logo {
     height: 2.1rem;
+    opacity: .8;
 }
 
 nav .container {

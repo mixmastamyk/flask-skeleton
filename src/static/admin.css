@@ -47,7 +47,7 @@ form.admin-form input[type='checkbox'] { /* left-align, prevent centering */
 /* Tone down white backgrounds, end */
 
 /* Dashboard */
-.fa {
+i.fa, i.glypicon {
     opacity: .8;
 }
 .panel {

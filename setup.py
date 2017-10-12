@@ -49,7 +49,7 @@ setup(
         'docs': pkg_docs_reqs,
         'gun': ('gunicorn',),
     },
-    tests_require     = ('pytest',),
+    tests_require     = ('pytest', 'flake8-colors'),
 
     classifiers       = (
         'Development Status :: 2 - Pre-Alpha',

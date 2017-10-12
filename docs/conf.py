@@ -18,7 +18,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import sys, os
-sys.path.insert(0, os.path.abspath('../main'))
+sys.path.insert(0, os.path.abspath('../src'))
 
 from meta import (authors, copyright_date, description,
                   fullname, __version__)  # noqa: E402

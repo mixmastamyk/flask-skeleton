@@ -5,11 +5,9 @@
           http://flask.pocoo.org/docs/0.12/errorhandling/#error-mails
 '''
 import sys
-import logging
 import traceback
+import logging, logging.handlers
 from logging import Formatter
-from os.path import expanduser
-from glob import glob
 
 from .main import app
 
@@ -22,8 +20,6 @@ logging.EXCEPT = 42     # app exception
 DEBUG = logging.DEBUG
 
 log = logging.getLogger()
-# does Symbola font exist?
-exist_font = glob(expanduser('~/.fonts/[Ss]ymbola*.???'))
 Formatter_format = Formatter.format  # shortcut
 
 
@@ -43,7 +39,6 @@ class ColorFmtr(Formatter):
             CRITICAL = white_on_red,
             FATAL    = white_on_red,
             NOTSET   = b'\x1b[0m',                   # reset
-            #~ OTHER    = b'\x1b[35m',                  # magenta
         )
         self.icomap = icomap = dict(
             DEBUG       = '•',
@@ -51,11 +46,10 @@ class ColorFmtr(Formatter):
             WARNING     = '⚠',
             NOTE        = '★',
             ERROR       = '✗',
-            EXCEPT      = '💣' if exist_font else '✘',
-            CRITICAL    = '💀' if exist_font else '✘',
-            FATAL       = '💀' if exist_font else '✘',
+            EXCEPT      = '💣',
+            CRITICAL    = '💀',
+            FATAL       = '💀',
             NOTSET      = '•',
-            KIVY        = '•',
         )
         # "render" levels
         for levelname in colormap.keys():
@@ -69,6 +63,7 @@ class ColorFmtr(Formatter):
             )
 
     def format(self, record):
+        ''' Log color formatting, probably could be done better. '''
         levelname = record.levelname
         s = Formatter_format(self, record)
         s = s.replace(levelname, self.colormap.get(levelname, levelname), 1)
@@ -78,6 +73,7 @@ class ColorFmtr(Formatter):
 def makefunc(level):
     ''' A convenience function for adding to a Logger. '''
     if level == logging.EXCEPT:
+        # if an exception and debug level, emit the traceback
         def tb_func(msg, *args, **kwargs):
             log._log(level, msg, args, **kwargs)
             if log.isEnabledFor(logging.DEBUG):

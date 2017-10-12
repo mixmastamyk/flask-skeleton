@@ -26,7 +26,7 @@ mail = Mail(app)
 migrate = Migrate(app, db)
 
 
-# additional imports to avoid circular import issues w/flask objects.
+# additional imports below avoid circular import issues w/flask objects.
 from .logcfg import log  # noqa: E402
 from . import models, forms, views, admin, utils, errors  # noqa: F401,E402
 
@@ -64,7 +64,7 @@ security = Security(app, user_datastore,
                     forgot_password_form=forms.ExForgotPasswordForm,
                    )
 
-# flask-restless shenanigans:
+# flask-restless (api) shenanigans:
 from .auth import rest_preprocessors  # noqa: E402
 api = APIManager(app, flask_sqlalchemy_db=db, preprocessors=rest_preprocessors)
 models.register_models_with_api(models, api)

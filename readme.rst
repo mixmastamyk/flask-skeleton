@@ -135,6 +135,18 @@ however.
 
 Then, hack away on your new project!
 
+Pre-reqs:
+~~~~~~~~~~~~~~~~~~
+
+To install the prerquisites::
+
+    pip3 install --user --upgrade --pre --no-deps flask_restless  # temporary
+
+    pip3 install --user --upgrade -e .
+
+You may prefer a global, virtual, or "pipenv" for this instead of a user
+install.
+
 
 Container stuff
 ~~~~~~~~~~~~~~~~~~
@@ -145,6 +157,22 @@ Notes::
     - sudo setcap CAP_NET_BIND_SERVICE=+eip .../caddy       # ? bind low ports
 
 
+
+Testing
+--------------------
+
+Run ``make test`` in the project folder to run linters and test suite.
+
+To run eslint and the style linter, you'll need node.js unfortunately::
+
+    sudo apt install nodejs
+
+Pytest and flake8 with colors for testing .py files::
+
+    pip3 install --user --upgrade pytest flake8-colors
+
+You may prefer a global, virtual, or "pipenv" for this instead of a user
+install.
 
 
 Usage

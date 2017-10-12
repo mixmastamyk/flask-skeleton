@@ -97,8 +97,8 @@ WTF_CSRF_ENABLED = True  # default, but just in case
 
 try:  # may overwrite vars above
     sys.path.append('..')
-    from config_local import *  # noqa: F403, F401
+    from config_local import *  # noqa: F403,F401
     sys.path.pop()
-except ImportError:
+except ImportError as err:
     from logcfg import log
-    log.warn('local config not found.')
+    log.warn('local config not found: %s', err)
